@@ -1,0 +1,10 @@
+
+jQuery("#drawing_container").sketchyPad({
+//options
+  width:600,
+  height:600,
+  numOfLayers: 3,
+  levelsOfUndo: 5
+});
+
+

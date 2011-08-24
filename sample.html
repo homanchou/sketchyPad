@@ -1,14 +1,15 @@
 <!DOCTYPE html> 
 <html> 
 <head> 
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script src="jquery.min.js"></script>
   <script src="jsSketchyPad.js"></script>
 </head>
 <body>
-  <div id="sketchpad_container">
-  </div>
+
+  <div id="sketchpad_container" style="border:1px solid black;">
+ </div>
   <script>
-    $("sketchpad_container").sketchyPad({
+    $("#sketchpad_container").sketchyPad({
       width:400,
       height:400
     });

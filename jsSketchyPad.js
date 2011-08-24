@@ -3,11 +3,12 @@
 //
 (function($){
   
-    var mouseX, mouseY;
     var offset;
-    var current_point;
-    var points = [];
+    var currentPoint;
     var top_canvas;
+    var opacity;
+    var color;
+    var brushSize = 1;
     var brush;
 
 
@@ -55,7 +56,7 @@
          jQuery(window).resize(function() { offset = top_canvas.offset();  });
          
          //set brush (TODO, expansion to other brushes)
-         //brush = new simple();
+         brush = new simple(top_canvas.get(0).getContext("2d"));
 
          //track mouse movements
          $(window).bind('mousemove', $.sketchyPad.onWindowMouseMove);
@@ -63,26 +64,30 @@
          top_canvas.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
     };
     $.sketchyPad.onWindowMouseMove = function(event) {
-         current_point = $.sketchyPad.getBrushPoint(event);
-         console.log('window mouse move');
-         
+         lastPoint = currentPoint;
+         currentPoint = $.sketchyPad.getBrushPoint(event);
+        
     };
-      $.sketchyPad.getBrushPoint = function(event) {
-         return {x:event.clientX - offset.left + window.pageXOffset, y:event.clientY - offset.top + window.pageYOffset}
-      };
+    $.sketchyPad.getBrushPoint = function(event) {
+       return {x:event.clientX - offset.left + window.pageXOffset, y:event.clientY - offset.top + window.pageYOffset}
+    };
 
-      $.sketchyPad.onCanvasMouseDown = function(event) {
-        console.log('mouse down');
-        //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
-        $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
-        $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
-      };
-      $.sketchyPad.onWindowMouseUp = function(event) {
-        console.log('mouse up');
-      };
-      $.sketchyPad.onCanvasMouseMove = function(event) {
-        console.log('canvas mouse move');
-      };
+    $.sketchyPad.onCanvasMouseDown = function(event) {
+      
+      //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
+      $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
+      $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
+    
+      brush.strokeStart(currentPoint);
+    };
+    $.sketchyPad.onWindowMouseUp = function(event) {
+      brush.strokeEnd();
+      $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
+      $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
+    };
+    $.sketchyPad.onCanvasMouseMove = function(event) {
+      brush.stroke(currentPoint);
+    };
       
 
    
@@ -94,12 +99,25 @@ function simple(context){
   this.init( context );
 }
 simple.prototype = {
+  prevPoint: null,
   context: null,
   init: function(context) {
     this.context = context;
     this.context.globalCompositeOperation = 'source-over';
   },
-  strokeStart: function(point) {
+  strokeStart: function(point) { 
+      this.prevPoint = point;
+  },
+  stroke: function(point) {
+      this.context.lineWidth = 2;
+      this.context.strokeStyle = "rgba(20, 5, 99, 0.9)";
+      this.context.beginPath();
+      this.context.moveTo(this.prevPoint.x, this.prevPoint.y);
+      this.context.lineTo(point.x, point.y);
+      this.context.stroke();
+      this.prevPoint = point;
+  },
+  strokeEnd: function() {
   }
 };
 

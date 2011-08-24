@@ -14,6 +14,8 @@ jQuery("#drawing_container").sketchyPad({
   height:600,
 });
 
+See sample.html for example implementation.
+
 If you prefer another color picker, simply bind the onChange event to the setColor static function.
 
 jQuery.sketchyPad.setColor(...);

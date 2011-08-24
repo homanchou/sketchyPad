@@ -1,25 +1,34 @@
-jQuery plugin that adds drawing HTML5 drawing capability to a webpage.  
+jQuery plugin that adds HTML5 canvas drawing capability to a webpage.  
 Influenced by (http://mrdoob.com/projects/harmony/)
 
-Include jQuery library and jsSketchPad.js to your page's HTML HEAD section.  
-Create a containing element to hold and position your drawing area.
+In your HTML HEAD section include jQuery then jsSketchPad.js and any brushes you
+want to allow the user to choose from.
 
-<div id="drawing_container"></div>
-
-Call sketchyPad method on your arbitrary container element and sketchyPad will append canvas elements to the DOM.
+Usage (override defaults by specifying options hash):
 
 jQuery("#drawing_container").sketchyPad({
 //options
   width:600,
-  height:600,
+  height:600
 });
 
-See sample.html for example implementation.
+Or reset plugin options by redefining defaults:
+
+jQuery.fn.sketchyPad.defaults = {
+  width: 800,
+  height: 400
+  /* ... */
+}
+jQuery('#my_drawing_pad').sketchyPad(); //will use the new defaults
+
+
+See sample.html for example implementation with color picker bindings.
 
 If you prefer another color picker, simply bind the onChange event to the setColor static function.
 
 jQuery.sketchyPad.setColor(...);
 
-Create custom brushes by adding your own brush file in brushes folder.  
+Create custom brushes by adding your own brush file in brushes folder (see brush samples).
+  
 
 

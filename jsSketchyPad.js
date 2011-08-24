@@ -20,13 +20,13 @@
        var element = this;
        
        //inject css styling for the canvas to position layers absolutely and to set default cursor
-       $.fn.sketchyPad.methods.injectCSS(opts);
+       $.sketchyPad.injectCSS(opts);
 
        //create drawing area
-       $.fn.sketchyPad.methods.createCanvas(element, opts);
+       $.sketchyPad.createCanvas(element, opts);
 
        //set all event handling
-       $.fn.sketchyPad.methods.registerEvents();
+       $.sketchyPad.registerEvents();
              
        return element;
 
@@ -39,15 +39,15 @@
            styleSheetPath: 'sketchyPad.css'
     };
 
-    //overridable methods
-    $.fn.sketchyPad.methods = {
-      injectCSS: function(opts) {
+    //static functions
+    $.sketchyPad = {};
+    $.sketchyPad.injectCSS = function(opts) {
           $('head').append('<link rel="stylesheet" href="' + opts.styleSheetPath + '" type="text/css" />');
-      },
-      createCanvas: function(element, opts) {
+    };
+    $.sketchyPad.createCanvas = function(element, opts) {
         element.append("<canvas id='top' class='sketch_layer' width='"+opts.width+"px' height='"+opts.height+"'></canvas>")
-      },
-      registerEvents: function() {
+    };
+    $.sketchyPad.registerEvents = function() {
          //get the offset in case the window is resized, coordinates are always relative to canvas 
          top_canvas = $('#top');
          offset = top_canvas.offset();
@@ -55,41 +55,51 @@
          jQuery(window).resize(function() { offset = top_canvas.offset();  });
          
          //set brush (TODO, expansion to other brushes)
-         brush = new simple();
+         //brush = new simple();
 
          //track mouse movements
-         $(window).bind('mousemove', $.fn.sketchyPad.methods.onWindowMouseMove);
+         $(window).bind('mousemove', $.sketchyPad.onWindowMouseMove);
          //canvas detect mouse down -- register more events
-         top_canvas.bind('mousedown', $.fn.sketchyPad.methods.onCanvasMouseDown);
-      },
-      onWindowMouseMove: function(event) {
-         current_point = $.fn.sketchyPad.methods.getBrushPoint(event);
+         top_canvas.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
+    };
+    $.sketchyPad.onWindowMouseMove = function(event) {
+         current_point = $.sketchyPad.getBrushPoint(event);
          console.log('window mouse move');
          
-      },
-      getBrushPoint: function(event) {
+    };
+      $.sketchyPad.getBrushPoint = function(event) {
          return {x:event.clientX - offset.left + window.pageXOffset, y:event.clientY - offset.top + window.pageYOffset}
-      },
-      onCanvasMouseDown: function(event) {
+      };
+
+      $.sketchyPad.onCanvasMouseDown = function(event) {
         console.log('mouse down');
         //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
-        $(window).bind('mouseup', $.fn.sketchyPad.methods.onWindowMouseUp);
-        $(window).bind('mousemove', $.fn.sketchyPad.methods.onCanvasMouseMove);
-      },
-      onWindowMouseUp: function(event) {
+        $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
+        $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
+      };
+      $.sketchyPad.onWindowMouseUp = function(event) {
         console.log('mouse up');
-      },
-      onCanvasMouseMove: function(event) {
+      };
+      $.sketchyPad.onCanvasMouseMove = function(event) {
         console.log('canvas mouse move');
-      }
+      };
       
-    };
-
 
    
 // end of closure
 
 })(jQuery);
 
-
+function simple(context){
+  this.init( context );
+}
+simple.prototype = {
+  context: null,
+  init: function(context) {
+    this.context = context;
+    this.context.globalCompositeOperation = 'source-over';
+  },
+  strokeStart: function(point) {
+  }
+};
 

@@ -1,15 +1,15 @@
 
-jsSketchyPad: jQuery drawing pad plug-in
+sketchyPad: jQuery drawing pad plug-in
 =======================================
 
-jsSketchyPad is a [jQuery](http://jquery.com/) plug-in that can add one or more
+sketchyPad is a [jQuery](http://jquery.com/) plug-in that can add one or more
 HTML5 canvas elements to a webpage capable of receiving mouse or touch
 events to create a digital painting right in your browser.
 
 Basic Usage
 -----------
 
-1) a. include jsSketchyPad.js in your HTML:
+1) a. include sketchyPad.js in your HTML:
       
       <script type="text/javascript" src="farbtastic.js"></script>
 

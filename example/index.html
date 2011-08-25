@@ -2,8 +2,8 @@
 <html> 
 <head> 
   <script src="jquery.min.js"></script>
-  <script src="jsSketchyPad.js"></script>
-  <script src="brushes/simple.js"></script>
+  <script src="../jsSketchyPad.js"></script>
+  <script src="../brushes/simple.js"></script>
 </head>
 <body>
 
@@ -12,7 +12,8 @@
   <script>
     $("#sketchpad_container").sketchyPad({
       width:400,
-      height:400
+      height:400,
+      styleSheetPath: "../sketchyPad.css" 
     });
   </script>
 </body>

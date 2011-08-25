@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Farbtastic 1</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="./../../src/1/farbtastic.js"></script>
+<link rel="stylesheet" type="text/css" href="./../../src/1/farbtastic.css"/>
+<style type="text/css" media="screen">
+.colorwell {
+	border: 2px solid #fff;
+	width: 6em;
+	text-align: center;
+	cursor: pointer;
+}
+.colorwell-selected {
+	border: 2px solid #000;
+	font-weight: bold;
+}
+#demo { color: red; font-size: 1.4em; }
+form { width: 500px; }
+</style>
+<script type="text/javascript">
+$(document).ready(function() {
+	// if jQuery is loaded then hide demo splash
+	$("#demo").hide();
+
+	var f = $.farbtastic("#picker"),
+		p = $("#picker").css("opacity", 0.25),
+		selected;
+
+	$(".colorwell")
+		.each(function () { f.linkTo(this); $(this).css('opacity', 0.75); })
+		.focus(function () {
+			if (selected) {
+				$(selected).css('opacity', 0.75).removeClass('colorwell-selected');
+			}
+
+			f.linkTo(this);
+			p.css('opacity', 1);
+			$(selected = this).css('opacity', 1).addClass('colorwell-selected');
+		});
+});
+</script>
+</head>
+<body>
+<h1>jQuery Color Picker: Farbtastic 1</h1>
+
+<div id="demo">jQuery.js is not present. You must install jQuery in this folder for the demo to work.</div>
+
+<form action="">
+	<div id="picker" style="float: right;"></div>
+	<div class="form-item"><label for="color1">Color 1:<input type="text" id="color1" name="color1" class="colorwell" value="#123456"/></label></div>
+	<div class="form-item"><label for="color2">Color 2:<input type="text" id="color2" name="color2" class="colorwell" value="#123456"/></label></div>
+	<div class="form-item"><label for="color3">Color 3:<input type="text" id="color3" name="color3" class="colorwell" value="#123456"/></label></div>
+</form>
+
+<p>More info available on the <a href="http://code.google.com/p/farbtastic/">Farbtastic Project</a> page.</p>
+<p>Created by <a href="http://www.acko.net/">Steven Wittens</a>.</p>
+</body>
+</html>

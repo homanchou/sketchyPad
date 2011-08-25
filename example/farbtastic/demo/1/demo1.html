@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Farbtastic 1</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+<script type="text/javascript" src="./../../src/1/farbtastic.js"></script>
+<link rel="stylesheet" type="text/css" href="./../../src/1/farbtastic.css"/>
+<script type="text/javascript">
+$(document).ready(function () {
+	// if jQuery is loaded then hide demo splash
+	$("#demo").hide();
+
+	// initialize object: method 1
+	$("#picker1").farbtastic({callback: "#color1"});
+
+	// initialize object: method 2
+	$.farbtastic.init($("#picker2"), {callback: "#color2"});
+
+	// initialize object: method 3
+	$.farbtastic.init($("#picker3"));
+	$("#picker3").farbtastic("linkTo", "#color3");
+
+	// initialize object: method 4
+	$.farbtastic.init($("#picker4"));
+	$.farbtastic.linkTo($("#picker4"), "#color4");
+});
+</script>
+<style type="text/css" media="screen">
+#demo { color: red; font-size: 1.4em; }
+.form { width: 400px; }
+</style>
+</head>
+<body>
+<h1>jQuery Color Picker: Farbtastic 1</h1>
+
+<div id="demo">jQuery.js is not present. You must install jQuery in this folder for the demo to work.</div>
+
+<table>
+	<tr>
+		<td>Color: <input type="text" id="color1" value="#123456"/><div id="picker1"></div></td>
+		<td>Color: <input type="text" id="color2" value="#WhenColorIsNotAvailable"/><div id="picker2"></div></td>
+		<td>Color: <input type="text" id="color3" value=""/><div id="picker3"></div></td>
+		<td>Color: <input type="text" id="color4" value="#WhenColorIsNotAvailable"/><div id="picker4"></div></td>
+	</tr>
+</table>
+
+<p>More info available on the <a href="http://code.google.com/p/farbtastic/">Farbtastic Project</a> page.</p>
+<p>Created by <a href="http://www.acko.net/">Steven Wittens</a>.</p>
+</body>
+</html>

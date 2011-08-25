@@ -2,16 +2,15 @@
 sketchyPad: jQuery drawing pad plug-in
 =======================================
 
-sketchyPad is a [jQuery](http://jquery.com/) plug-in that can add one or more
-HTML5 canvas elements to a webpage capable of receiving mouse or touch
-events to create a digital painting right in your browser.
+sketchyPad is a [jQuery](http://jquery.com/) plug-in that enables drawing/painting lines
+right in your web browser. 
 
 Basic Usage
 -----------
 
 1) a. include sketchyPad.js in your HTML:
       
-      <script type="text/javascript" src="farbtastic.js"></script>
+      <script type="text/javascript" src="sketchyPad.js"></script>
 
    b. include any brushes you want to use.
 
@@ -39,19 +38,19 @@ Advanced Usage
 
 ### Override defaults by passing options:
 
-jQuery("#drawing_container").sketchyPad({
-//options
-  width:600,
-  height:600
-});
+    jQuery("#drawing_container").sketchyPad({
+    //options
+      width:600,
+      height:600
+    });
 
 Or reset plugin options by redefining defaults:
 
-jQuery.sketchyPad.defaults = {
-  width: 800,
-  height: 400
-  /* ... */
-}
+    jQuery.sketchyPad.defaults = {
+      width: 800,
+      height: 400
+      /* ... */
+    }
 
 jQuery('#my_drawing_pad').sketchyPad(); //will use the new defaults
 
@@ -59,10 +58,10 @@ After invoking sketchyPad you can continue to set color, opacity, brushSize usin
 
 ### methods
 
-jQuery.sketchyPad.setBrushSize(5);
-jQuery.sketchyPad.setColor([0,0,0]);
-jQuery.sketchyPad.setBrush("simple");
-jQuery.sketchyPad.setOpacity(0.9);
+    jQuery.sketchyPad.setBrushSize(5);
+    jQuery.sketchyPad.setColor([0,0,0]);
+    jQuery.sketchyPad.setBrush("simple");
+    jQuery.sketchyPad.setOpacity(0.9);
 
 ### switch out color picker
 

@@ -56,17 +56,15 @@
     },
     
     createCanvas: function() {
-       //element.append("<canvas id='layer1' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='layer1' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
 
        element.append("<canvas id='top' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
        top_canvas = $('#top');
        //get the offset in case the window is resized, coordinates are always relative to canvas 
-       offset = top_canvas.offset();
+       offset = element.offset();
       
-       $("#layer1").click(function() {alert('hi');});
-
-
+    
     },
     
     setBrush: function(brushType) {

@@ -1,18 +1,19 @@
 /*
-Draws straight lines between points sampled with mouseMove event
+Draws smooth curve "between" points sampled with mouseMove event.  (curve doesn't go through all points... it's an approximation).
+http://stackoverflow.com/questions/7054272/how-to-draw-smooth-curve-through-n-points-using-javascript-html5-canvas
 */
-function simple(context){
+function smooth(context){
   this.init( context );
 }
 simple.prototype = {
-  prevPoint: null,
+  points: [],
   context: null,
   init: function(context) {
     this.context = context;
     this.context.globalCompositeOperation = 'source-over';
   },
   strokeStart: function(point, opts) { 
-      this.prevPoint = point;
+      this.points.push(point);
   },
   stroke: function(point, opts) {
       this.context.lineWidth = opts.brushSize;
@@ -26,4 +27,3 @@ simple.prototype = {
   strokeEnd: function(points, opts) {
   }
 };
-

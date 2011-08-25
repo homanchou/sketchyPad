@@ -14,13 +14,19 @@ jQuery("#drawing_container").sketchyPad({
 
 Or reset plugin options by redefining defaults:
 
-jQuery.fn.sketchyPad.defaults = {
+jQuery.sketchyPad.defaults = {
   width: 800,
   height: 400
   /* ... */
 }
 jQuery('#my_drawing_pad').sketchyPad(); //will use the new defaults
 
+After invoking sketchyPad you can continue to set color, opacity, brushSize using setters like this:
+
+jQuery.sketchyPad.setBrushSize(5);
+jQuery.sketchyPad.setColor([0,0,0]);
+jQuery.sketchyPad.setBrush("simple");
+jQuery.sketchyPad.setOpacity(0.9);
 
 See sample.html for example implementation with color picker bindings.
 

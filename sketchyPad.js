@@ -13,8 +13,8 @@
       
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
-                   
-       //this jQuery object
+                  
+             //this jQuery object
        element = this;
        
        //inject css styling for the canvas to position layers absolutely and to set default cursor
@@ -90,6 +90,17 @@
         }
     },
 
+    getColor: function() {
+       var color = $.sketchyPad.opts.color;
+       return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
+    },
+
+    toHex: function(n) {
+       n = parseInt(n,10);
+       if (isNaN(n)) return "00";
+       n = Math.max(0,Math.min(n,255));
+       return "0123456789ABCDEF".charAt((n-n%16)/16) + "0123456789ABCDEF".charAt(n%16);
+    },   
     setBrushSize: function(brushSize) {
       $.sketchyPad.opts.brushSize = brushSize;
     },

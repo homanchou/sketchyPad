@@ -8,20 +8,19 @@ right in your web browser.
 Basic Usage
 -----------
 
-1) a. include sketchyPad.js in your HTML:
+1) include sketchyPad.js in your HTML:
       
       <script type="text/javascript" src="sketchyPad.js"></script>
 
-   b. include any brushes you want to use.
+2) include any brushes you want to use.
 
       <script type="text/javascript" src="simple.js"></script>
 
-2) Add a placeholder div give it an ID:
+3) Add a placeholder div give it an ID:
 
      <div id="drawing_container"></div>
 
-3) Add a `ready()` handler to the document which and append the drawing canvas
-    into the placeholder with the following syntax:
+4) Add the drawing canvas into the placeholder with the following syntax:
 
     <script type="text/javascript">
       $(document).ready(function() {
@@ -52,7 +51,7 @@ Or reset plugin options by redefining defaults:
       /* ... */
     }
 
-jQuery('#my_drawing_pad').sketchyPad(); //will use the new defaults
+    jQuery('#my_drawing_pad').sketchyPad(); //will use the new defaults
 
 After invoking sketchyPad you can continue to set color, opacity, brushSize using setters like this:
 

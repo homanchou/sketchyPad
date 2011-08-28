@@ -75,6 +75,16 @@
     setColor: function(stringOrArray) {
         if (typeof(stringOrArray)=='string') {
           //TODO support comma delimited string or hexidecial with # or without #
+          var string = stringOrArray;
+          if (string.charAt(0) == "#") {
+            string = string.substring(1,7);
+          }
+          var r = parseInt(string.substring(0,2),16);
+          var g = parseInt(string.substring(2,4),16);
+          var b = parseInt(string.substring(4,6),16);
+
+          $.sketchyPad.opts.color = [r,g,b];
+
         } else {
           $.sketchyPad.opts.color = stringOrArray;
         }

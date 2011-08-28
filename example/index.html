@@ -4,17 +4,31 @@
   <script src="jquery.min.js"></script>
   <script src="../sketchyPad.js"></script>
   <script src="../brushes/simple.js"></script>
+  <link rel="stylesheet" type="text/css" href="mattfarina-farbtastic-4bb6bbf/farbtastic.css"/>
+  <script type="text/javascript" src="mattfarina-farbtastic-4bb6bbf/farbtastic.js"></script>
+  
 </head>
 <body>
 
   <div id="sketchpad_container" style="position:absolute; top:50px; left:200px;">
- </div>
-  <script>
-    $("#sketchpad_container").sketchyPad({
-      width:400,
-      height:400,
-      styleSheetPath: "../sketchyPad.css" 
-    });
+  </div>
+
+  <div id="colorpicker_container" style="position:absolute;top:50px;left:650px;">
+    <div id="colorpicker"></div>
+  </div>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+        $("#sketchpad_container").sketchyPad({
+          width:400,
+          height:400,
+          styleSheetPath: "../sketchyPad.css" 
+        });
+        
+     $('#colorpicker').farbtastic(function(color) {$.sketchyPad.setColor(color); });
+
+
+       });
   </script>
 </body>
 </html>

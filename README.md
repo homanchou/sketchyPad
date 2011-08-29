@@ -55,12 +55,15 @@ Or reset plugin options by redefining defaults:
 
 After invoking sketchyPad you can continue to set color, opacity, brushSize using setters like this:
 
-### methods
+### Methods
 
     jQuery.sketchyPad.setBrushSize(5);
-    jQuery.sketchyPad.setColor([0,0,0]);
-    jQuery.sketchyPad.setBrush("simple");
+    jQuery.sketchyPad.setColor('#FFFF00');
+    jQuery.sketchyPad.setBrush("Simple");
     jQuery.sketchyPad.setOpacity(0.9);
+
+sketchyPad stores these brush settings in localStorage.  You can retrieve the values with getters to
+initialize your custom sliders and color picker on page load.
 
 ### switch out color picker
 

@@ -1,10 +1,10 @@
 /*
 Draws straight lines between points sampled with mouseMove event
 */
-function simple(context){
+function Simple(context){
   this.init( context );
 }
-simple.prototype = {
+Simple.prototype = {
   prevPoint: null,
   context: null,
   init: function(context) {

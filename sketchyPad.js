@@ -14,18 +14,21 @@
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
        //if localStorage is empty
+       
        if (localStorage.color == undefined) {
            //copy brush opts into localStorage
 
            localStorage.brush_size = $.sketchyPad.opts.brushSize;
            localStorage.opacity = $.sketchyPad.opts.opacity;
            localStorage.color = $.sketchyPad.opts.color;
+           localStorage.brush_type = $.sketchyPad.opts.brushType;
        } else {
            //else override brush opts from localStorage
 
            $.sketchyPad.opts.brushSize = localStorage.brush_size;
            $.sketchyPad.opts.opacity = localStorage.opacity;
            $.sketchyPad.opts.color = localStorage.color;
+           $.sketchyPad.opts.brushType = localStorage.brush_type;
        }
                
        //this jQuery object
@@ -38,7 +41,7 @@
        $.sketchyPad.createCanvas();
 
        //initialize default brushType
-       $.sketchyPad.setBrush($.sketchyPad.opts.defaultBrushType);
+       $.sketchyPad.setBrush($.sketchyPad.opts.brushType);
 
        //set all event handling
        $.sketchyPad.registerEvents();
@@ -59,7 +62,7 @@
        brushSize: 1,
        opacity: 0.9,
        color: '#FF00FF',
-       defaultBrushType: "simple"
+       brushType: "Simple"
     },
     
     //options
@@ -90,10 +93,14 @@
     },
     
     setBrush: function(brushType) {
+        localStorage.brush_type = brushType;
         var context = top_canvas.get(0).getContext("2d");
         brush = eval("new " + brushType + "(context)");    
     },
 
+    getBrushType: function() {
+      return localStorage.brush_type;
+    },
     setColor: function(color) {
       localStorage.color = color;
       $.sketchyPad.opts.color = color;
@@ -120,9 +127,17 @@
       $.sketchyPad.opts.brushSize = brushSize;
     },
 
+    getBrushSize: function() {
+      return localStorage.brush_size;
+    },
+
     setOpacity: function(opacity) {
         localStorage.opacity = opacity;
         $.sketchyPad.opts.opacity = opacity;
+    },
+
+    getOpacity: function() {
+      return localStorage.opacity;
     },
 
     registerEvents: function() {

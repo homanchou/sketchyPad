@@ -4,6 +4,9 @@
   <script src="jquery.min.js"></script>
   <script src="../sketchyPad.js"></script>
   <script src="../brushes/simple.js"></script>
+
+  <script src="../brushes/smooth.js"></script>
+
   <link rel="stylesheet" type="text/css" href="mattfarina-farbtastic-4bb6bbf/farbtastic.css"/>
   <script type="text/javascript" src="mattfarina-farbtastic-4bb6bbf/farbtastic.js"></script>
   
@@ -17,7 +20,8 @@
     <div id="colorpicker"></div>
     <div>Brush Size:<input id="brush_size" type="range" value="10" min="1" max="100"/></div> 
     <div>Opacity: <input id="opacity" type="range" value="0.8" step="0.01" min="0.01" max="1.00"/></div> 
-    
+    <form><select id="brushType"><option>Simple</option><option>Smooth</option></select></form>
+     
   </div>
 
   <script type="text/javascript">
@@ -35,12 +39,12 @@
 //binds brush size and opacity
 $("#brush_size").change(function(){
     $.sketchyPad.setBrushSize(this.value);
-  }).val(localStorage['brush_size']);
+  }).val($.sketchyPad.getBrushSize());
 $("#opacity").change(function(){
     $.sketchyPad.setOpacity(this.value);
-  }).val(localStorage['opacity']);
+  }).val($.sketchyPad.getOpacity());
   
-
+$("#brushType").change(function(){$.sketchyPad.setBrush(this.value);}).val($.sketchyPad.getBrushType());
 
        });
   </script>

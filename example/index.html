@@ -35,11 +35,9 @@
 //binds brush size and opacity
 $("#brush_size").change(function(){
     $.sketchyPad.setBrushSize(this.value);
- localStorage['brush_size']=this.value; 
   }).val(localStorage['brush_size']);
 $("#opacity").change(function(){
     $.sketchyPad.setOpacity(this.value);
- localStorage['opacity']=this.value; 
   }).val(localStorage['opacity']);
   
 

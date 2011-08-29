@@ -13,8 +13,22 @@
       
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
-                  
-             //this jQuery object
+       //if localStorage is empty
+       if (localStorage.color == undefined) {
+           //copy brush opts into localStorage
+
+           localStorage.brush_size = $.sketchyPad.opts.brushSize;
+           localStorage.opacity = $.sketchyPad.opts.opacity;
+           localStorage.color = $.sketchyPad.opts.color;
+       } else {
+           //else override brush opts from localStorage
+
+           $.sketchyPad.opts.brushSize = localStorage.brush_size;
+           $.sketchyPad.opts.opacity = localStorage.opacity;
+           $.sketchyPad.opts.color = localStorage.color;
+       }
+               
+       //this jQuery object
        element = this;
        
        //inject css styling for the canvas to position layers absolutely and to set default cursor
@@ -44,7 +58,7 @@
        styleSheetPath: 'sketchyPad.css',
        brushSize: 1,
        opacity: 0.9,
-       color: [0,0,0],
+       color: '#FF00FF',
        defaultBrushType: "simple"
     },
     
@@ -66,33 +80,33 @@
       
     
     },
+    getRGBA: function() {
+        var color = $.sketchyPad.opts.color;
+        var opacity = $.sketchyPad.opts.opacity;
+        if (color.charAt(0) == '#') {
+          color = color.substring(1,7);
+        }
+        return "rgba("+parseInt(color.substring(0,2),16)+","+parseInt(color.substring(2,4),16)+","+parseInt(color.substring(4,6),16)+","+opacity+")";
+    },
     
     setBrush: function(brushType) {
         var context = top_canvas.get(0).getContext("2d");
         brush = eval("new " + brushType + "(context)");    
     },
 
-    setColor: function(stringOrArray) {
-        if (typeof(stringOrArray)=='string') {
-          //TODO support comma delimited string or hexidecial with # or without #
-          var string = stringOrArray;
-          if (string.charAt(0) == "#") {
-            string = string.substring(1,7);
-          }
-          var r = parseInt(string.substring(0,2),16);
-          var g = parseInt(string.substring(2,4),16);
-          var b = parseInt(string.substring(4,6),16);
-
-          $.sketchyPad.opts.color = [r,g,b];
-
-        } else {
-          $.sketchyPad.opts.color = stringOrArray;
-        }
+    setColor: function(color) {
+      localStorage.color = color;
+      $.sketchyPad.opts.color = color;
     },
 
     getColor: function() {
+       
        var color = $.sketchyPad.opts.color;
-       return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
+       if (color.length == 6) {
+           return "#" + color;
+        }
+        return color;
+       //return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
     },
 
     toHex: function(n) {
@@ -102,10 +116,12 @@
        return "0123456789ABCDEF".charAt((n-n%16)/16) + "0123456789ABCDEF".charAt(n%16);
     },   
     setBrushSize: function(brushSize) {
+      localStorage.brush_size = brushSize;
       $.sketchyPad.opts.brushSize = brushSize;
     },
 
     setOpacity: function(opacity) {
+        localStorage.opacity = opacity;
         $.sketchyPad.opts.opacity = opacity;
     },
 
@@ -136,17 +152,17 @@
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
     
-      brush.strokeStart(currentPoint, $.sketchyPad.opts);
+      brush.strokeStart(currentPoint, $.sketchyPad);
     },
 
     onWindowMouseUp: function(event) {
-      brush.strokeEnd(currentPoint, $.sketchyPad.opts);
+      brush.strokeEnd(currentPoint, $.sketchyPad);
       $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
     },
     
     onCanvasMouseMove: function(event) {
-      brush.stroke(currentPoint, $.sketchyPad.opts);
+      brush.stroke(currentPoint, $.sketchyPad);
     }
       
  }; //end overridable functions

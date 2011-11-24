@@ -3,10 +3,10 @@
 //
 (function($){
   
-  var offset;
+  var element; //container element (jQuery object), used to append canvas element(s)
+  var top_canvas; //the topmost drawing canvas 
+  var offset; //set with top_canvas.offset() each time window is resized
   var currentPoint;
-  var top_canvas;
-  var element;
   var brush;
 
   $.fn.sketchyPad = function(options){
@@ -15,20 +15,19 @@
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
        
        $.sketchyPad.initLocalStorage();
-                      
-       //this jQuery object
+       
        element = this;
        
-       //inject css styling for the canvas to position layers absolutely and to set default cursor
        $.sketchyPad.injectCSS();
 
-       //create drawing area
        $.sketchyPad.createCanvas();
 
-       //initialize default brushType
+       top_canvas = $('#top');
+       
+       offset = element.offset();
+  
        $.sketchyPad.setBrush($.sketchyPad.opts.brushType);
 
-       //set all event handling
        $.sketchyPad.registerEvents();
              
        return element;
@@ -58,14 +57,17 @@
     },
     
     createCanvas: function() {
+
+       
+       element.append("<canvas id='layer5' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='layer4' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='layer3' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='layer2' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
        element.append("<canvas id='layer1' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
 
        element.append("<canvas id='top' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-       top_canvas = $('#top');
-       //get the offset in case the window is resized, coordinates are always relative to canvas 
-       offset = element.offset();
-      
+     
     
     },
     getRGBA: function() {

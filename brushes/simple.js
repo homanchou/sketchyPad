@@ -10,7 +10,7 @@ Simple.prototype = {
   init: function(context) {
     this.context = context;
     this.context.globalCompositeOperation = 'source-over';
-   // this.context.lineCap = 'round';
+    this.context.lineCap = 'round';
   },
   strokeStart: function(point, sketchyPad) { 
       this.prevPoint = point;

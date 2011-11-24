@@ -4,9 +4,7 @@
 (function($){
   
   var element; //container element (jQuery object), used to append canvas element(s)
-  var top_canvas; //the topmost drawing canvas 
   var offset; //set with top_canvas.offset() each time window is resized
-  var currentPoint;
   var brush;
 
   $.fn.sketchyPad = function(options){
@@ -22,7 +20,7 @@
 
        $.sketchyPad.createCanvas();
 
-       top_canvas = $('#top');
+       $.sketchyPad.opts.topCanvas = $('#top');
        
        offset = element.offset();
   
@@ -46,7 +44,9 @@
        brushSize: 1,
        opacity: 0.9,
        color: '#FF00FF',
-       brushType: "Simple"
+       brushType: "Simple",
+       currentPoint: undefined,
+       topCanvas: undefined
     },
     
     //options
@@ -81,7 +81,7 @@
     
     setBrush: function(brushType) {
         localStorage.brush_type = brushType;
-        var context = top_canvas.get(0).getContext("2d");
+        var context = $.sketchyPad.opts.topCanvas.get(0).getContext("2d");
         brush = eval("new " + brushType + "(context)");    
     },
 
@@ -130,17 +130,18 @@
     registerEvents: function() {
 
 
-         $(window).resize(function() { offset = top_canvas.offset();  });
+         $(window).resize(function() { offset = $.sketchyPad.opts.topCanvas.offset();  });
          
          //track mouse movements
          $(window).bind('mousemove', $.sketchyPad.onWindowMouseMove);
          //canvas detect mouse down -- register more events
-         top_canvas.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
+         $.sketchyPad.opts.topCanvas.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
     },
     
     onWindowMouseMove: function(event) {
- 
-         currentPoint = $.sketchyPad.getBrushPoint(event);
+      //um.... why do we need currentPoint for?  when we have getBrushPoint?
+      //because the funcation cannot be called within brush, it has no event context
+         $.sketchyPad.opts.currentPoint = $.sketchyPad.getBrushPoint(event);
         
     },
     
@@ -154,17 +155,17 @@
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
     
-      brush.strokeStart(currentPoint, $.sketchyPad);
+      brush.strokeStart($.sketchyPad);
     },
 
     onWindowMouseUp: function(event) {
-      brush.strokeEnd(currentPoint, $.sketchyPad);
+      brush.strokeEnd($.sketchyPad);
       $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
     },
     
     onCanvasMouseMove: function(event) {
-      brush.stroke(currentPoint, $.sketchyPad);
+      brush.stroke($.sketchyPad);
     },
 
     initLocalStorage: function() {

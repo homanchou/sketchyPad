@@ -2,22 +2,22 @@
 Draws smooth curve "between" points sampled with mouseMove event.  (curve doesn't go through all points... it's an approximation).
 http://stackoverflow.com/questions/7054272/how-to-draw-smooth-curve-through-n-points-using-javascript-html5-canvas
 */
-function Smooth(ctx){
-  this.init( ctx );
+function Smooth(sketchyPad){
+  this.init(sketchyPad);
 }
 Smooth.prototype = {
   points: [],
   ctx: null,
-  init: function(ctx) {
-    this.ctx = ctx;
+  init: function(sketchyPad) {
+    this.ctx = sketchyPad.opts.topCanvas.get(0).getContext("2d");
     this.ctx.globalCompositeOperation = 'source-over';
     this.ctx.lineCap = 'round';
   },
-  strokeStart: function(point, sketchyPad) { 
-      this.points.push(point);
+  strokeStart: function(sketchyPad) { 
+      this.points.push(sketchyPad.opts.currentPoint);
   },
-  stroke: function(point, sketchyPad) {
-      this.points.push(point);
+  stroke: function(sketchyPad) {
+      this.points.push(sketchyPad.opts.currentPoint);
 
       //we need at least 4 sample points for this function to work
       if (this.points.length < 4) {
@@ -46,7 +46,7 @@ Smooth.prototype = {
       this.ctx.stroke();
 
   },
-  strokeEnd: function(points, sketchyPad) {
+  strokeEnd: function(sketchyPad) {
   }
 };
 

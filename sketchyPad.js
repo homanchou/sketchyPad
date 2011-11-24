@@ -81,8 +81,8 @@
     
     setBrush: function(brushType) {
         localStorage.brush_type = brushType;
-        var context = $.sketchyPad.opts.topCanvas.get(0).getContext("2d");
-        brush = eval("new " + brushType + "(context)");    
+      //  var context = $.sketchyPad.opts.topCanvas.get(0).getContext("2d");
+        brush = eval("new " + brushType + "($.sketchyPad)");    
     },
 
     getBrushType: function() {

@@ -1,19 +1,18 @@
 /*
 Draws straight lines between points sampled with mouseMove event
 */
-function Simple(context){
-  this.init( context );
+function Simple(sketchyPad){
+  this.init(sketchyPad);
 }
 Simple.prototype = {
   prevPoint: null,
   context: null,
-  init: function(context) {
-    this.context = context;
+  init: function(sketchyPad) {
+    this.context = sketchyPad.opts.topCanvas.get(0).getContext("2d");
     this.context.globalCompositeOperation = 'source-over';
     this.context.lineCap = 'round';
   },
   strokeStart: function(sketchyPad) { 
-    console.log(sketchyPad);
     this.prevPoint = sketchyPad.opts.currentPoint;
   },
   stroke: function(sketchyPad) {

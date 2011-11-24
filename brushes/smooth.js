@@ -7,29 +7,26 @@ function Smooth(sketchyPad){
 }
 Smooth.prototype = {
   points: [],
-  ctx: null,
+  upper: undefined,
+  lower: undefined,
   init: function(sketchyPad) {
-    this.ctx = sketchyPad.opts.topCanvas.get(0).getContext("2d");
-    this.ctx.globalCompositeOperation = 'source-over';
-    this.ctx.lineCap = 'round';
+    //upper
+    this.upper = sketchyPad.opts.topCanvas.get(0).getContext("2d");
+    this.upper.globalCompositeOperation = 'source-over';
+    this.upper.lineCap = 'round';
+    //lower
+    this.lower = $('#layer1').get(0).getContext("2d");
+    this.lower.globalCompositeOperation = 'source-over';
+    this.lower.lineCap = 'round';
+
   },
   strokeStart: function(sketchyPad) { 
-      this.points.push(sketchyPad.opts.currentPoint);
+    this.points.push(sketchyPad.opts.currentPoint);
   },
-  stroke: function(sketchyPad) {
-      this.points.push(sketchyPad.opts.currentPoint);
-
-      //we need at least 4 sample points for this function to work
-      if (this.points.length < 4) {
-        return;
-      }
-      this.ctx.lineWidth = sketchyPad.opts.brushSize;
-      this.ctx.strokeStyle = sketchyPad.getRGBA();
-      this.ctx.beginPath();
-      
-      
-// now move to the first point
-   this.ctx.moveTo(this.points[0].x, this.points[0].y);
+  drawCurveStroke: function(context) {
+    context.beginPath();
+   // move to the first point
+    context.moveTo(this.points[0].x, this.points[0].y);
     
     // curve through the rest, stopping at each midpoint
     for (i = 1; i < this.points.length - 2; i ++)
@@ -38,15 +35,34 @@ Smooth.prototype = {
 
        var xc = (this.points[i].x + this.points[i + 1].x) / 2;
        var yc = (this.points[i].y + this.points[i + 1].y) / 2;
-       this.ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);
+       context.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);
     }
     // curve through the last two points
-    this.ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, this.points[i+1].x,this.points[i+1].y);
+    context.quadraticCurveTo(this.points[i].x, this.points[i].y, this.points[i+1].x,this.points[i+1].y);
 
-      this.ctx.stroke();
+    context.stroke();
+
+ 
+  },
+  stroke: function(sketchyPad) {
+      this.points.push(sketchyPad.opts.currentPoint);
+
+      //we need at least 4 sample points for this function to work
+      if (this.points.length < 4) {
+        return;
+      }
+      this.upper.lineWidth = sketchyPad.opts.brushSize;
+      this.upper.strokeStyle = sketchyPad.getRGBA();
+      this.upper.clearRect(0, 0, this.upper.canvas.width, this.upper.canvas.height);
+      this.drawCurveStroke(this.upper);
 
   },
   strokeEnd: function(sketchyPad) {
+    this.upper.clearRect(0, 0, this.upper.canvas.width, this.upper.canvas.height);
+    this.lower.lineWidth = sketchyPad.opts.brushSize;
+    this.lower.strokeStyle = sketchyPad.getRGBA();
+    this.drawCurveStroke(this.lower);
+    this.points = [];
   }
 };
 

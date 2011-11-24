@@ -13,24 +13,9 @@
       
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
-       //if localStorage is empty
        
-       if (localStorage.color == undefined) {
-           //copy brush opts into localStorage
-
-           localStorage.brush_size = $.sketchyPad.opts.brushSize;
-           localStorage.opacity = $.sketchyPad.opts.opacity;
-           localStorage.color = $.sketchyPad.opts.color;
-           localStorage.brush_type = $.sketchyPad.opts.brushType;
-       } else {
-           //else override brush opts from localStorage
-
-           $.sketchyPad.opts.brushSize = localStorage.brush_size;
-           $.sketchyPad.opts.opacity = localStorage.opacity;
-           $.sketchyPad.opts.color = localStorage.color;
-           $.sketchyPad.opts.brushType = localStorage.brush_type;
-       }
-               
+       $.sketchyPad.initLocalStorage();
+                      
        //this jQuery object
        element = this;
        
@@ -178,6 +163,24 @@
     
     onCanvasMouseMove: function(event) {
       brush.stroke(currentPoint, $.sketchyPad);
+    },
+
+    initLocalStorage: function() {
+       //if localStorage is empty
+       if (localStorage.color == undefined) {
+           //copy brush opts into localStorage
+           localStorage.brush_size = $.sketchyPad.opts.brushSize;
+           localStorage.opacity = $.sketchyPad.opts.opacity;
+           localStorage.color = $.sketchyPad.opts.color;
+           localStorage.brush_type = $.sketchyPad.opts.brushType;
+       } else {
+           //else override brush opts from localStorage
+           $.sketchyPad.opts.brushSize = localStorage.brush_size;
+           $.sketchyPad.opts.opacity = localStorage.opacity;
+           $.sketchyPad.opts.color = localStorage.color;
+           $.sketchyPad.opts.brushType = localStorage.brush_type;
+       }
+
     }
       
  }; //end overridable functions

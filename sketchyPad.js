@@ -147,13 +147,41 @@
          $(window).bind('mousemove', $.sketchyPad.onWindowMouseMove);
          //canvas detect mouse down -- register more events
          $.sketchyPad.opts.topCanvas.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
+         $.sketchyPad.opts.topCanvas.bind('mousemove', $.sketchyPad.drawCursor);
+
     },
     
     onWindowMouseMove: function(event) {
+
+         
+
       //um.... why do we need currentPoint for?  when we have getBrushPoint?
       //because the funcation cannot be called within brush, it has no event context
          $.sketchyPad.opts.currentPoint = $.sketchyPad.getBrushPoint(event);
         
+    },
+    drawCursor: function(e) {
+    
+      var upper = $.sketchyPad.opts.topCanvas.get(0).getContext('2d');
+   
+      //draw a circle at mouse position
+      upper.clearRect(0, 0, upper.canvas.width, upper.canvas.height);
+      //  drawCurveStroke(upper);
+
+      var new_point = $.sketchyPad.opts.currentPoint;
+      if (new_point) {
+           upper.strokeStyle = $.sketchyPad.getRGBA(); //"rgba(" + color[0] + ", " + color[1] + ", " + color[2] + ", " + opacity + ")";        
+           upper.lineCap = "round";
+
+           //ctx.strokeStyle = "rgba(" + color[0] + ", " + color[1] + ", " + color[2] + ", " + opacity + ")";        
+           upper.lineWidth = 1;
+
+           upper.beginPath();
+
+           upper.arc(new_point.x, new_point.y,parseInt($.sketchyPad.getBrushSize())/2, 0, Math.PI * 2, true);
+           upper.stroke();
+
+      }
     },
     
     getBrushPoint: function(event) {
@@ -161,7 +189,8 @@
     },
 
     onCanvasMouseDown: function(event) {
-      
+      $.sketchyPad.opts.topCanvas.unbind('mousemove', $.sketchyPad.drawCursor);
+
       //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
@@ -173,6 +202,7 @@
       brush.strokeEnd($.sketchyPad);
       $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
+      $.sketchyPad.opts.topCanvas.bind('mousemove', $.sketchyPad.drawCursor);      
     },
     
     onCanvasMouseMove: function(event) {

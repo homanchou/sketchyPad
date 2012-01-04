@@ -81,6 +81,11 @@ Tested with
 jQuery 1.6.1 & Chrome 13
 
 
+TODO
+-----
+
+Add layers 
+Add Undo
 
 
 

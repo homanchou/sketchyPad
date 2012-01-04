@@ -102,7 +102,18 @@
         return color;
        //return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
     },
+    toString: function(layer) {
+      if (typeof(layer)==='undefined') {
+        layer = "layer1";
+      }
 
+      var canvas = document.getElementById(layer);
+      var type = "image/png";
+      var data = canvas.toDataURL(type);
+      console.log(data);
+      return data.replace('data:' + type + ';base64,', '');
+     
+    },
     toHex: function(n) {
        n = parseInt(n,10);
        if (isNaN(n)) return "00";

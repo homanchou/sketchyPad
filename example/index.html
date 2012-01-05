@@ -31,20 +31,22 @@
           height:400,
           styleSheetPath: "../sketchyPad.css" 
         });
-         //when color picker changes, send new color info to sketchyPad   
-      var fb = $.farbtastic('#colorpicker',function(color) {$.sketchyPad.setColor(color); });
- //when page loads, set color picker to localStorage color set inside sketchyPad
-      fb.setColor($.sketchyPad.getColor());    
+      
+        //when color picker changes, send new color info to sketchyPad   
+        var fb = $.farbtastic('#colorpicker',function(color) {$.sketchyPad.setColor(color); });
+ 
+        //when page loads, set color picker to localStorage color set inside sketchyPad
+        fb.setColor($.sketchyPad.getColor());    
 
-//binds brush size and opacity
-$("#brush_size").change(function(){
-    $.sketchyPad.setBrushSize(this.value);
-  }).val($.sketchyPad.getBrushSize());
-$("#opacity").change(function(){
-    $.sketchyPad.setOpacity(this.value);
-  }).val($.sketchyPad.getOpacity());
-  
-$("#brushType").change(function(){$.sketchyPad.setBrush(this.value);}).val($.sketchyPad.getBrushType());
+        //binds brush size and opacity
+        $("#brush_size").change(function(){
+            $.sketchyPad.setBrushSize(this.value);
+          }).val($.sketchyPad.getBrushSize());
+        $("#opacity").change(function(){
+            $.sketchyPad.setOpacity(this.value);
+          }).val($.sketchyPad.getOpacity());
+          
+        $("#brushType").change(function(){$.sketchyPad.setBrush(this.value);}).val($.sketchyPad.getBrushType());
 
        });
   </script>

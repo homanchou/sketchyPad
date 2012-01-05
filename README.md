@@ -2,8 +2,7 @@
 sketchyPad: jQuery plug-in for drawing with a pen stylus
 =========================================================
 
-sketchyPad is a [jQuery](http://jquery.com/) plug-in that enables painting
-in a web browser via HTML5 canvas. 
+sketchyPad is a [jQuery](http://jquery.com/) plug-in that enables painting with a stylus into HTML5 canvas. 
 
 Integration
 -----------

@@ -11,11 +11,11 @@
       
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
-       
+       //restore or set color, brushsize, opacity 
        $.sketchyPad.initLocalStorage();
        
        element = this;
-       
+       //add some stylings required by sketchyPad
        $.sketchyPad.injectCSS();
 
        $.sketchyPad.createCanvas();
@@ -58,13 +58,15 @@
     
     createCanvas: function() {
 
-       
+       /*
+       TODO support multiple layers
        element.append("<canvas id='layer5' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
        element.append("<canvas id='layer4' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
        element.append("<canvas id='layer3' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
        element.append("<canvas id='layer2' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-       element.append("<canvas id='layer1' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       */
 
+       element.append("<canvas id='layer1' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
        element.append("<canvas id='top' class='sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
      
@@ -160,7 +162,7 @@
          $.sketchyPad.opts.currentPoint = $.sketchyPad.getBrushPoint(event);
         
     },
-    drawCursor: function(e) {
+    drawCursor: function() {
     
       var upper = $.sketchyPad.opts.topCanvas.get(0).getContext('2d');
    
@@ -170,17 +172,18 @@
 
       var new_point = $.sketchyPad.opts.currentPoint;
       if (new_point) {
-           upper.strokeStyle = $.sketchyPad.getRGBA(); //"rgba(" + color[0] + ", " + color[1] + ", " + color[2] + ", " + opacity + ")";        
-           upper.lineCap = "round";
+          
+        upper.strokeStyle=$.sketchyPad.getColor();
+        upper.lineCap = "round";
+        upper.lineWidth = 1;
 
-           //ctx.strokeStyle = "rgba(" + color[0] + ", " + color[1] + ", " + color[2] + ", " + opacity + ")";        
-           upper.lineWidth = 1;
-
-           upper.beginPath();
-
-           upper.arc(new_point.x, new_point.y,parseInt($.sketchyPad.getBrushSize())/2, 0, Math.PI * 2, true);
-           upper.stroke();
-
+        upper.fillStyle=$.sketchyPad.getRGBA();
+        upper.beginPath();
+        upper.arc(new_point.x, new_point.y,parseInt($.sketchyPad.getBrushSize())/2, 0, Math.PI * 2, true);
+        upper.stroke(); 
+        upper.closePath();
+        upper.fill();
+     
       }
     },
     
@@ -190,12 +193,16 @@
 
     onCanvasMouseDown: function(event) {
       $.sketchyPad.opts.topCanvas.unbind('mousemove', $.sketchyPad.drawCursor);
-
+      //clear cursor
+      var topCanvasCanvas = $.sketchyPad.opts.topCanvas.get(0).getContext('2d');
+      topCanvasCanvas.clearRect(0,0,topCanvasCanvas.canvas.width, topCanvasCanvas.canvas.height);
+    
       //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
     
       brush.strokeStart($.sketchyPad);
+     // brush.stroke($.sketchyPad);
     },
 
     onWindowMouseUp: function(event) {

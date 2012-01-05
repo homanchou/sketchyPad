@@ -24,6 +24,18 @@ Smooth.prototype = {
     this.points.push(sketchyPad.opts.currentPoint);
   },
   drawCurveStroke: function(context) {
+      
+     //we need at least 4 sample points for this function to work
+     if (this.points.length > 0 && this.points.length < 4) {
+        var point = this.points[0];
+        context.beginPath();
+        context.arc(point.x, point.y,parseInt(context.lineWidth)/2, 0, Math.PI * 2, true);
+        context.closePath();
+        context.fill();
+
+        return;
+     }
+
     context.beginPath();
    // move to the first point
     context.moveTo(this.points[0].x, this.points[0].y);
@@ -46,13 +58,9 @@ Smooth.prototype = {
   },
   stroke: function(sketchyPad) {
       this.points.push(sketchyPad.opts.currentPoint);
-
-      //we need at least 4 sample points for this function to work
-      if (this.points.length < 4) {
-        return;
-      }
       this.upper.lineWidth = sketchyPad.opts.brushSize;
       this.upper.strokeStyle = sketchyPad.getRGBA();
+      this.upper.fillStyle = sketchyPad.getRGBA();
       this.upper.clearRect(0, 0, this.upper.canvas.width, this.upper.canvas.height);
       this.drawCurveStroke(this.upper);
 
@@ -61,6 +69,7 @@ Smooth.prototype = {
     this.upper.clearRect(0, 0, this.upper.canvas.width, this.upper.canvas.height);
     this.lower.lineWidth = sketchyPad.opts.brushSize;
     this.lower.strokeStyle = sketchyPad.getRGBA();
+    this.lower.fillStyle = sketchyPad.getRGBA();
     this.drawCurveStroke(this.lower);
     this.points = [];
   }

@@ -86,15 +86,15 @@ include the brush file into the page, create a selector and bind it's onChange e
 Tested with
 -----------
 
-jQuery 1.6.1, 1.7.1 
-Chrome 13,16
+* jQuery 1.6.1, 1.7.1 
+* Chrome 13,16
 
 
 TODO
 -----
 
-Add layers 
-Add Undo
+* Add layers 
+* Add Undo
 
 
 

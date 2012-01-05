@@ -1,18 +1,18 @@
 
-sketchyPad: jQuery drawing pad plug-in
-=======================================
+sketchyPad: jQuery plug-in for drawing with a pen stylus
+=========================================================
 
-sketchyPad is a [jQuery](http://jquery.com/) plug-in that enables drawing/painting lines
-right in your web browser. 
+sketchyPad is a [jQuery](http://jquery.com/) plug-in that enables painting
+in a web browser via HTML5 canvas. 
 
-Basic Usage
+Integration
 -----------
 
 1) include sketchyPad.js in your HTML:
       
       <script type="text/javascript" src="sketchyPad.js"></script>
 
-2) include any brushes you want to use.
+2) include any brushes you want to use.  (A "smooth" brush and a "simple" brush are included)
 
       <script type="text/javascript" src="simple.js"></script>
 
@@ -28,9 +28,9 @@ Basic Usage
       });
     </script>
 
- 
-See `example/index.html` for an example.
+5) Add a color picker and opacity, brush-size sliders.
 
+See `example/index.html` for an example.
 
 Advanced Usage
 --------------
@@ -63,22 +63,31 @@ After invoking sketchyPad you can continue to set color, opacity, brushSize usin
     jQuery.sketchyPad.setOpacity(0.9);
 
 sketchyPad stores these brush settings in localStorage.  You can retrieve the values with getters to
-initialize your custom sliders and color picker on page load.
+initialize your custom sliders and color picker on page load.  See example/index.html
 
 ### switch out color picker
 
 If you prefer another color picker, simply bind the onChange event to the setColor static function.
 
-jQuery.sketchyPad.setColor(...);
+    jQuery.sketchyPad.setColor(...);
 
 ### brushes
 
-Create custom brushes by adding your own brush file in brushes folder (see brush samples).
+Create custom brushes by adding a class that implements the 4 methods:
+
+1. init
+2. strokeStart
+3. stroke
+4. strokeEnd
+
+include the brush file into the page, create a selector and bind it's onChange event to the `$.sketchyPad.setBrush()` method.
+
 
 Tested with
 -----------
 
-jQuery 1.6.1 & Chrome 13
+jQuery 1.6.1, 1.7.1 
+Chrome 13,16
 
 
 TODO

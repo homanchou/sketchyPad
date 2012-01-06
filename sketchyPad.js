@@ -11,9 +11,7 @@
       
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
-       //restore or set color, brushsize, opacity 
-       $.sketchyPad.initLocalStorage();
-       
+              
        element = this;
        //add some stylings required by sketchyPad
        $.sketchyPad.injectCSS();
@@ -23,9 +21,10 @@
        $.sketchyPad.opts.topCanvas = $('#top');
        
        offset = element.offset();
-  
-       $.sketchyPad.setBrush($.sketchyPad.opts.brushType);
-
+ 
+        //restore or set color, brushsize, brushtype, opacity 
+       $.sketchyPad.initLocalStorage();
+ 
        $.sketchyPad.registerEvents();
              
        return element;
@@ -213,21 +212,10 @@
     },
 
     initLocalStorage: function() {
-       //if localStorage is empty
-       if (localStorage.sketchypad_color === undefined || localStorage.sketchypad_brush_size === undefined || localStorage.sketchypad_opacity === undefined || localStorage.sketchypad_brush_type === undefined) {
-           //save first time brush opts into localStorage
-           localStorage.sketchypad_brush_size = $.sketchyPad.opts.brushSize;
-           localStorage.sketchypad_opacity = $.sketchyPad.opts.opacity;
-           localStorage.sketchypad_color = $.sketchyPad.opts.color;
-           localStorage.sketchypad_brush_type = $.sketchyPad.opts.brushType;
-       } else {
-           //else load (override) brush opts from localStorage
-           $.sketchyPad.opts.brushSize = localStorage.sketchypad_brush_size;
-           $.sketchyPad.opts.opacity = localStorage.sketchypad_opacity;
-           $.sketchyPad.opts.color = localStorage.sketchypad_color;
-           $.sketchyPad.opts.brushType = localStorage.sketchypad_brush_type;
-       }
-
+       $.sketchyPad.setColor(localStorage.sketchypad_color || $.sketchyPad.opts.color);
+       $.sketchyPad.setBrush(localStorage.sketchypad_brush_type || $.sketchyPad.opts.brushType);
+       $.sketchyPad.setBrushSize(localStorage.sketchypad_brush_size || $.sketchyPad.opts.brushSize);
+       $.sketchyPad.setOpacity(localStorage.sketchypad_opacity || $.sketchyPad.opts.opacity);
     }
       
  }; //end overridable functions

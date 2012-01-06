@@ -40,9 +40,9 @@
        width: 600,
        height: 600,
        styleSheetPath: 'sketchyPad.css',
-       brushSize: 1,
-       opacity: 0.9,
-       color: '#FF00FF',
+       brushSize: 2,
+       opacity: 0.7,
+       color: '#454545',
        brushType: "Simple",
        currentPoint: undefined,
        topCanvas: undefined

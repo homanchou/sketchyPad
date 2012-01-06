@@ -17,7 +17,7 @@
        element = this;
        //add some stylings required by sketchyPad
        $.sketchyPad.injectCSS();
-
+ 
        $.sketchyPad.createCanvas();
 
        $.sketchyPad.opts.topCanvas = $('#top');
@@ -78,16 +78,16 @@
     },
     
     setBrush: function(brushType) {
-        localStorage.brush_type = brushType;
+        localStorage.sketchypad_brush_type = brushType;
       //  var context = $.sketchyPad.opts.topCanvas.get(0).getContext("2d");
         brush = eval("new " + brushType + "($.sketchyPad)");    
     },
 
     getBrushType: function() {
-      return localStorage.brush_type;
+      return localStorage.sketchypad_brush_type;
     },
     setColor: function(color) {
-      localStorage.color = color;
+      localStorage.sketchypad_color = color;
       $.sketchyPad.opts.color = color;
     },
 
@@ -119,21 +119,21 @@
        return "0123456789ABCDEF".charAt((n-n%16)/16) + "0123456789ABCDEF".charAt(n%16);
     },   
     setBrushSize: function(brushSize) {
-      localStorage.brush_size = brushSize;
+      localStorage.sketchypad_brush_size = brushSize;
       $.sketchyPad.opts.brushSize = brushSize;
     },
 
     getBrushSize: function() {
-      return localStorage.brush_size;
+      return localStorage.sketchypad_brush_size;
     },
 
     setOpacity: function(opacity) {
-        localStorage.opacity = opacity;
+        localStorage.sketchypad_opacity = opacity;
         $.sketchyPad.opts.opacity = opacity;
     },
 
     getOpacity: function() {
-      return localStorage.opacity;
+      return localStorage.sketchypad_opacity;
     },
 
     registerEvents: function() {
@@ -214,18 +214,18 @@
 
     initLocalStorage: function() {
        //if localStorage is empty
-       if (localStorage.color == undefined) {
-           //copy brush opts into localStorage
-           localStorage.brush_size = $.sketchyPad.opts.brushSize;
-           localStorage.opacity = $.sketchyPad.opts.opacity;
-           localStorage.color = $.sketchyPad.opts.color;
-           localStorage.brush_type = $.sketchyPad.opts.brushType;
+       if (localStorage.sketchypad_color === undefined || localStorage.sketchypad_brush_size === undefined || localStorage.sketchypad_opacity === undefined || localStorage.sketchypad_brush_type === undefined) {
+           //save first time brush opts into localStorage
+           localStorage.sketchypad_brush_size = $.sketchyPad.opts.brushSize;
+           localStorage.sketchypad_opacity = $.sketchyPad.opts.opacity;
+           localStorage.sketchypad_color = $.sketchyPad.opts.color;
+           localStorage.sketchypad_brush_type = $.sketchyPad.opts.brushType;
        } else {
-           //else override brush opts from localStorage
-           $.sketchyPad.opts.brushSize = localStorage.brush_size;
-           $.sketchyPad.opts.opacity = localStorage.opacity;
-           $.sketchyPad.opts.color = localStorage.color;
-           $.sketchyPad.opts.brushType = localStorage.brush_type;
+           //else load (override) brush opts from localStorage
+           $.sketchyPad.opts.brushSize = localStorage.sketchypad_brush_size;
+           $.sketchyPad.opts.opacity = localStorage.sketchypad_opacity;
+           $.sketchyPad.opts.color = localStorage.sketchypad_color;
+           $.sketchyPad.opts.brushType = localStorage.sketchypad_brush_type;
        }
 
     }

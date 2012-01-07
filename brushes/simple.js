@@ -8,8 +8,8 @@ Simple.prototype = {
   prevPoint: null,
   context: null,
   init: function(sketchyPad) {
-   // this.context = sketchyPad.opts.topCanvas.get(0).getContext("2d");
-    this.context = $('#layer1').get(0).getContext("2d");
+   // this.context = sketchyPad.opts.interactiveLayer.get(0).getContext("2d");
+    this.context = sketchyPad.getCurrentLayer().get(0).getContext("2d");
     this.context.globalCompositeOperation = 'source-over';
     this.context.lineCap = 'round';
   },

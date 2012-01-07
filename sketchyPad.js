@@ -16,9 +16,9 @@
        //add some stylings required by sketchyPad
        $.sketchyPad.injectCSS();
  
-       $.sketchyPad.createCanvas();
+       $.sketchyPad.createLayers();
 
-       $.sketchyPad.opts.topCanvas = $('#top');
+       $.sketchyPad.opts.interactiveLayer = $('#sketchypad_interactive_layer');
        
        offset = element.offset();
  
@@ -45,7 +45,9 @@
        color: '#454545',
        brushType: "Simple",
        currentPoint: undefined,
-       topCanvas: undefined
+       interactiveLayer: undefined,
+       undoIndex: 0,
+       currentLayerIndex: 0
     },
     
     //options
@@ -55,17 +57,20 @@
         $('head').append('<link rel="stylesheet" href="' + $.sketchyPad.opts.styleSheetPath + '" type="text/css" />');
     },
     
-    createCanvas: function() {
+    createLayers: function() {
 
        /*
        TODO support multiple layers
         */
 
-       element.append("<canvas id='layer1' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_layer_0' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
-       element.append("<canvas id='top' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_interactive_layer' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
      
     
+    },
+    getCurrentLayer: function() {
+      return $("#sketchypad_layer_"+this.opts.currentLayerIndex);
     },
     getRGBA: function() {
         var color = $.sketchyPad.opts.color;
@@ -78,7 +83,7 @@
     
     setBrush: function(brushType) {
         localStorage.sketchypad_brush_type = brushType;
-      //  var context = $.sketchyPad.opts.topCanvas.get(0).getContext("2d");
+      //  var context = $.sketchyPad.opts.interactiveLayer.get(0).getContext("2d");
         brush = eval("new " + brushType + "($.sketchyPad)");    
     },
 
@@ -99,18 +104,28 @@
         return color;
        //return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
     },
-    toString: function(layer) {
-      if (typeof(layer)==='undefined') {
-        layer = "layer1";
-      }
-
-      var canvas = document.getElementById(layer);
-      var type = "image/png";
-      var data = canvas.toDataURL(type);
-      console.log(data);
-      return data.replace('data:' + type + ';base64,', '');
-     
+    undo: function() {
     },
+    redo: function() {
+    },
+    reset: function() {
+    },
+    undoBufferPush: function() {
+    },
+
+    currentLayerToString: function() {
+      
+      var canvas = this.getCurrentLayer().get(0);
+      var type = "image/png";
+      return canvas.toDataURL(type);
+          
+    },
+    toString: function() {
+      //TODO get all the layers
+      return $.sketchyPad.currentLayerToString().replace('data:image/png;base64,', '');
+
+    }
+    ,
     toHex: function(n) {
        n = parseInt(n,10);
        if (isNaN(n)) return "00";
@@ -138,13 +153,13 @@
     registerEvents: function() {
 
 
-         $(window).resize(function() { offset = $.sketchyPad.opts.topCanvas.offset();  });
+         $(window).resize(function() { offset = $.sketchyPad.opts.interactiveLayer.offset();  });
          
          //track mouse movements
          $(window).bind('mousemove', $.sketchyPad.onWindowMouseMove);
          //canvas detect mouse down -- register more events
-         $.sketchyPad.opts.topCanvas.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
-         $.sketchyPad.opts.topCanvas.bind('mousemove', $.sketchyPad.drawCursor);
+         $.sketchyPad.opts.interactiveLayer.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
+         $.sketchyPad.opts.interactiveLayer.bind('mousemove', $.sketchyPad.drawCursor);
 
     },
     
@@ -159,7 +174,7 @@
     },
     drawCursor: function() {
     
-      var upper = $.sketchyPad.opts.topCanvas.get(0).getContext('2d');
+      var upper = $.sketchyPad.opts.interactiveLayer.get(0).getContext('2d');
    
       //draw a circle at mouse position
       upper.clearRect(0, 0, upper.canvas.width, upper.canvas.height);
@@ -187,10 +202,10 @@
     },
 
     onCanvasMouseDown: function(event) {
-      $.sketchyPad.opts.topCanvas.unbind('mousemove', $.sketchyPad.drawCursor);
+      $.sketchyPad.opts.interactiveLayer.unbind('mousemove', $.sketchyPad.drawCursor);
       //clear cursor
-      var topCanvasCanvas = $.sketchyPad.opts.topCanvas.get(0).getContext('2d');
-      topCanvasCanvas.clearRect(0,0,topCanvasCanvas.canvas.width, topCanvasCanvas.canvas.height);
+      var interactiveLayerCanvas = $.sketchyPad.opts.interactiveLayer.get(0).getContext('2d');
+      interactiveLayerCanvas.clearRect(0,0,interactiveLayerCanvas.canvas.width, interactiveLayerCanvas.canvas.height);
     
       //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
@@ -204,7 +219,7 @@
       brush.strokeEnd($.sketchyPad);
       $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
-      $.sketchyPad.opts.topCanvas.bind('mousemove', $.sketchyPad.drawCursor);      
+      $.sketchyPad.opts.interactiveLayer.bind('mousemove', $.sketchyPad.drawCursor);      
     },
     
     onCanvasMouseMove: function(event) {

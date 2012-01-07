@@ -11,11 +11,11 @@ Smooth.prototype = {
   lower: undefined,
   init: function(sketchyPad) {
     //upper
-    this.upper = sketchyPad.opts.topCanvas.get(0).getContext("2d");
+    this.upper = sketchyPad.opts.interactiveLayer.get(0).getContext("2d");
     this.upper.globalCompositeOperation = 'source-over';
     this.upper.lineCap = 'round';
     //lower
-    this.lower = $('#layer1').get(0).getContext("2d");
+    this.lower = sketchyPad.getCurrentLayer().get(0).getContext("2d");
     this.lower.globalCompositeOperation = 'source-over';
     this.lower.lineCap = 'round';
 
@@ -72,6 +72,9 @@ Smooth.prototype = {
     this.lower.fillStyle = sketchyPad.getRGBA();
     this.drawCurveStroke(this.lower);
     this.points = [];
+    //store to undo buffer
+    localStorage["undo_buffer_"+$.sketchyPad.opts.undoIndex] = $.sketchyPad.toString();
+    $.sketchyPad.opts.undoIndex++;
   }
 };
 

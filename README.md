@@ -92,8 +92,7 @@ Tested with
 TODO
 -----
 
-* Add layers 
-* Add Undo
-
+* Undo levels with layers
+* add eye icon for layers, and a widget for that would be conveniently packaged
 
 

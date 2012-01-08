@@ -48,7 +48,7 @@
        interactiveLayer: undefined,
        undoBuffer:[],
        undoIndex: -1,
-       currentLayerId: 'sketchypad_layer_0',
+       currentLayerId: 'sketchypad_layer_a',
        maxNumOfUndos: 50
     },
     
@@ -64,12 +64,12 @@
        /*
        TODO support multiple layers
         */
-       element.append("<canvas id='sketchypad_layer_2' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-       element.append("<canvas id='sketchypad_layer_1' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_layer_c' class='sketchypad_sketch_layer' style='z-index:10' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_layer_b' class='sketchypad_sketch_layer' style='z-index:20' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
-       element.append("<canvas id='sketchypad_layer_0' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_layer_a' class='sketchypad_sketch_layer' style='z-index:30' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
-       element.append("<canvas id='sketchypad_interactive_layer' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_interactive_layer' class='sketchypad_sketch_layer' style='z-index:50' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
      
     
     },

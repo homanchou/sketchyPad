@@ -24,6 +24,7 @@ Smooth.prototype = {
     c.addClass("sketchypad_sketch_layer");
     c.attr('width',$.sketchyPad.opts.width);
     c.attr('height',$.sketchyPad.opts.height);
+    c.css('z-index',parseInt($.sketchyPad.getCurrentLayer().css('z-index'))+1);
     c.insertAfter($.sketchyPad.getCurrentLayer());
     this.tempLayer = c;
     this.upper = c.get(0).getContext("2d");
@@ -36,7 +37,6 @@ Smooth.prototype = {
   },
   strokeStart: function(sketchyPad) { 
     this.init(sketchyPad);
-    console.log(sketchyPad.getCurrentLayer());
     this.points.push(sketchyPad.opts.currentPoint);
   },
   drawCurveStroke: function(context) {

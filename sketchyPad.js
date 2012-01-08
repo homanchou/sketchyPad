@@ -48,7 +48,7 @@
        interactiveLayer: undefined,
        undoBuffer:[],
        undoIndex: -1,
-       currentLayerIndex: 0,
+       currentLayerId: 'sketchypad_layer_0',
        maxNumOfUndos: 50
     },
     
@@ -64,6 +64,8 @@
        /*
        TODO support multiple layers
         */
+       element.append("<canvas id='sketchypad_layer_2' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       element.append("<canvas id='sketchypad_layer_1' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
        element.append("<canvas id='sketchypad_layer_0' class='sketchypad_sketch_layer' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
@@ -72,7 +74,10 @@
     
     },
     getCurrentLayer: function() {
-      return $("#sketchypad_layer_"+this.opts.currentLayerIndex);
+      return $("#"+this.opts.currentLayerId);
+    },
+    setCurrentLayer: function(id) {
+      this.opts.currentLayerId = id;
     },
     getRGBA: function() {
         var color = $.sketchyPad.opts.color;

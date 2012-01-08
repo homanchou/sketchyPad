@@ -14,6 +14,7 @@ Simple.prototype = {
     this.context.lineCap = 'round';
   },
   strokeStart: function(sketchyPad) { 
+    this.init(sketchyPad);
     this.prevPoint = sketchyPad.opts.currentPoint;
   },
   stroke: function(sketchyPad) {

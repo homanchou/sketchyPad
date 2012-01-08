@@ -9,18 +9,34 @@ Smooth.prototype = {
   points: [],
   upper: undefined,
   lower: undefined,
+  tempLayer: undefined,
   init: function(sketchyPad) {
-    //upper
-    this.upper = sketchyPad.opts.interactiveLayer.get(0).getContext("2d");
-    this.upper.globalCompositeOperation = 'source-over';
-    this.upper.lineCap = 'round';
-    //lower
+       //lower
     this.lower = sketchyPad.getCurrentLayer().get(0).getContext("2d");
     this.lower.globalCompositeOperation = 'source-over';
     this.lower.lineCap = 'round';
+ //upper
+/*    this.upper = sketchyPad.opts.interactiveLayer.get(0).getContext("2d");
+    this.upper.globalCompositeOperation = 'source-over';
+    this.upper.lineCap = 'round';
+*/
+    var c = $(document.createElement('canvas'));
+    c.addClass("sketchypad_sketch_layer");
+    c.attr('width',$.sketchyPad.opts.width);
+    c.attr('height',$.sketchyPad.opts.height);
+    c.insertAfter($.sketchyPad.getCurrentLayer());
+    this.tempLayer = c;
+    this.upper = c.get(0).getContext("2d");
+    this.upper.globalCompositeOperation = 'source-over';
+    this.upper.lineCap = 'round';
+
+    
+
 
   },
   strokeStart: function(sketchyPad) { 
+    this.init(sketchyPad);
+    console.log(sketchyPad.getCurrentLayer());
     this.points.push(sketchyPad.opts.currentPoint);
   },
   drawCurveStroke: function(context) {
@@ -74,6 +90,7 @@ Smooth.prototype = {
     this.points = [];
     //store to undo buffer
     sketchyPad.undoBufferPush();
+    this.tempLayer.remove();
   }
 };
 

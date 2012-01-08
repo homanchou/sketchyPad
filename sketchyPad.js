@@ -207,6 +207,7 @@
          //canvas detect mouse down -- register more events
          $.sketchyPad.opts.interactiveLayer.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
          $.sketchyPad.opts.interactiveLayer.bind('mousemove', $.sketchyPad.drawCursor);
+         $.sketchyPad.opts.interactiveLayer.bind('mouseout', $.sketchyPad.clearInteractiveLayer);
 
     },
     
@@ -218,6 +219,13 @@
       //because the funcation cannot be called within brush, it has no event context
          $.sketchyPad.opts.currentPoint = $.sketchyPad.getBrushPoint(event);
         
+    },
+    clearInteractiveLayer: function() {
+      var upper = $.sketchyPad.opts.interactiveLayer.get(0).getContext('2d');
+   
+      //draw a circle at mouse position
+      upper.clearRect(0, 0, upper.canvas.width, upper.canvas.height);
+      
     },
     drawCursor: function() {
     

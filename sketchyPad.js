@@ -48,7 +48,8 @@
        interactiveLayer: undefined,
        undoBuffer:[],
        undoIndex: -1,
-       currentLayerIndex: 0
+       currentLayerIndex: 0,
+       maxNumOfUndos: 50
     },
     
     //options
@@ -149,7 +150,7 @@
         $.sketchyPad.opts.undoBuffer = $.sketchyPad.opts.undoBuffer.slice(0,$.sketchyPad.opts.undoIndex+1);
       }
       //max of 10 undos
-      if ($.sketchyPad.opts.undoBuffer.length == 10) {
+      if ($.sketchyPad.opts.undoBuffer.length == $.sketchyPad.opts.maxNumOfUndos) {
         $.sketchyPad.opts.undoBuffer.shift();
       }
       var c = document.createElement('canvas');

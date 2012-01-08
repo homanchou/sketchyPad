@@ -40,7 +40,8 @@ Simple.prototype = {
         this.context.closePath();
         this.context.fill();
     }
-    
+    sketchyPad.undoBufferPush();
+ 
   }
 };
 

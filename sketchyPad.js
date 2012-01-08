@@ -26,7 +26,7 @@
        $.sketchyPad.initLocalStorage();
  
        $.sketchyPad.registerEvents();
-             
+       $.sketchyPad.undoBufferPush(); 
        return element;
 
   }; //end fn.sketchyPad function
@@ -46,7 +46,8 @@
        brushType: "Simple",
        currentPoint: undefined,
        interactiveLayer: undefined,
-       undoIndex: 0,
+       undoBuffer:[],
+       undoIndex: -1,
        currentLayerIndex: 0
     },
     
@@ -105,12 +106,58 @@
        //return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
     },
     undo: function() {
+      if ($.sketchyPad.opts.undoIndex < 1) {
+        //last undo, or no more undos
+        return false;
+      }
+      var layer = $.sketchyPad.getCurrentLayer();
+      var ctx = layer.get(0).getContext("2d");
+      ctx.clearRect ( 0 , 0 , $.sketchyPad.opts.width, $.sketchyPad.opts.height );
+
+
+      $.sketchyPad.opts.undoIndex--;
+      var c = $.sketchyPad.opts.undoBuffer[$.sketchyPad.opts.undoIndex];
+      ctx.drawImage(c, 0, 0);
+     
     },
     redo: function() {
+     
+      if ($.sketchyPad.opts.undoIndex == $.sketchyPad.opts.undoBuffer.length - 1) {
+        //last redo
+        return false;
+      }
+      var layer = $.sketchyPad.getCurrentLayer();
+      var ctx = layer.get(0).getContext("2d");
+      ctx.clearRect ( 0 , 0 , $.sketchyPad.opts.width, $.sketchyPad.opts.height );
+
+
+      $.sketchyPad.opts.undoIndex++;
+      var c = $.sketchyPad.opts.undoBuffer[$.sketchyPad.opts.undoIndex];
+      ctx.drawImage(c, 0, 0);
+
+
+
     },
     reset: function() {
+       $.sketchyPad.opts.undoBuffer = [];
+      $.sketchyPad.opts.undoIndex = -1;
     },
     undoBufferPush: function() {
+      if ($.sketchyPad.opts.undoIndex < $.sketchyPad.opts.undoBuffer.length - 1) {
+        //remove anything behind undoIndex
+        $.sketchyPad.opts.undoBuffer = $.sketchyPad.opts.undoBuffer.slice(0,$.sketchyPad.opts.undoIndex+1);
+      }
+      //max of 10 undos
+      if ($.sketchyPad.opts.undoBuffer.length == 10) {
+        $.sketchyPad.opts.undoBuffer.shift();
+      }
+      var c = document.createElement('canvas');
+      c.width  = $.sketchyPad.opts.width;
+      c.height = $.sketchyPad.opts.height;
+      c.getContext('2d').drawImage($.sketchyPad.getCurrentLayer().get(0).getContext("2d").canvas,0,0);
+  
+      $.sketchyPad.opts.undoBuffer.push(c);
+      $.sketchyPad.opts.undoIndex = $.sketchyPad.opts.undoBuffer.length -1;
     },
 
     currentLayerToString: function() {

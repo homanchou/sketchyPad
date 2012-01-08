@@ -73,8 +73,7 @@ Smooth.prototype = {
     this.drawCurveStroke(this.lower);
     this.points = [];
     //store to undo buffer
-    localStorage["undo_buffer_"+$.sketchyPad.opts.undoIndex] = $.sketchyPad.toString();
-    $.sketchyPad.opts.undoIndex++;
+    sketchyPad.undoBufferPush();
   }
 };
 

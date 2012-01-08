@@ -118,7 +118,8 @@
       $.sketchyPad.opts.undoIndex--;
       var c = $.sketchyPad.opts.undoBuffer[$.sketchyPad.opts.undoIndex];
       ctx.drawImage(c, 0, 0);
-     
+      //return number of undo's left
+      return $.sketchyPad.opts.undoIndex;
     },
     redo: function() {
      
@@ -135,7 +136,7 @@
       var c = $.sketchyPad.opts.undoBuffer[$.sketchyPad.opts.undoIndex];
       ctx.drawImage(c, 0, 0);
 
-
+       return $.sketchyPad.opts.undoBuffer.length -1 - $.sketchyPad.opts.undoIndex;
 
     },
     reset: function() {

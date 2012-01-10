@@ -12,19 +12,17 @@
        //options override defaults
        $.sketchyPad.opts = $.extend({}, $.sketchyPad.defaults, options);       
               
-       element = this;
+       element = this; 
        //add some stylings required by sketchyPad
        $.sketchyPad.injectCSS();
- 
+       //inject canvas elements into the page with stylings to line them up
        $.sketchyPad.createLayers();
-
-       $.sketchyPad.opts.interactiveLayer = $('#sketchypad_interactive_layer');
        
        offset = element.offset();
  
-        //restore or set color, brushsize, brushtype, opacity 
+       //restore or set color, brushsize, brushtype, opacity from localStorage
        $.sketchyPad.initLocalStorage();
- 
+       //event listeners
        $.sketchyPad.registerEvents();
        return element;
 
@@ -34,7 +32,7 @@
     //overridable static functions 
   $.sketchyPad = {
     
-    //default settings
+    //default settings as well as any variables that need to be accessible to public
     defaults : {
        width: 600,
        height: 600,
@@ -47,15 +45,15 @@
        interactiveLayer: undefined,
        redoBuffer:[],
        undoBuffer:[],
-       currentBuffer:{sketchypad_layer_a:undefined,sketchypad_layer_b:undefined,sketchypad_layer_c:undefined},
-       undoIndex: -1,
-       currentLayerId: 'sketchypad_layer_a',
+       currentBuffer:{},
+       numOfLayers:3,
+       currentLayerId: 'sketchypad_layer_0',
+       interactiveLayerId: 'sketchypad_interactive_layer',
+       canvasClassName: 'sketchypad_sketch_layer',
        maxNumOfUndos: 50,
-       totalStrokes: 0,
-       layerStrokes: {sketchypad_layer_a:0,sketchypad_layer_b:0,sketchypad_layer_c:0}
     },
     
-    //options
+    //options merged with defaults will be set here
     opts: {},
 
     injectCSS: function() {
@@ -64,29 +62,26 @@
     
     createLayers: function() {
 
-       /*
-       TODO support multiple layers
-        */
-       var zIndex = 30;
-       for (var layer_id in $.sketchyPad.opts.layerStrokes) {
-          element.append("<canvas id='"+layer_id+"' class='sketchypad_sketch_layer' style='z-index:"+zIndex+"' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-          zIndex = zIndex - 10;
+       var zIndex = $.sketchyPad.opts.numOfLayers * 10;
+       element.append("<canvas id='"+$.sketchyPad.opts.interactiveLayerId+"' class='"+$.sketchyPad.opts.canvasClassName+"' style='z-index:"+(zIndex+10)+"' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+ 
+       for (var i = 0; i < $.sketchyPad.opts.numOfLayers; i++) {
+          var layer_id = "sketchypad_layer_" + i;
+          element.append("<canvas id='"+layer_id+"' class='"+$.sketchyPad.opts.canvasClassName+"' style='z-index:"+zIndex+"' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+          zIndex -= 10; 
        }
 
-   //    element.append("<canvas id='sketchypad_layer_c' class='sketchypad_sketch_layer' style='z-index:10' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-   //    element.append("<canvas id='sketchypad_layer_b' class='sketchypad_sketch_layer' style='z-index:20' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-
-   //    element.append("<canvas id='sketchypad_layer_a' class='sketchypad_sketch_layer' style='z-index:30' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-
-       element.append("<canvas id='sketchypad_interactive_layer' class='sketchypad_sketch_layer' style='z-index:50' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-     
     
     },
     getCurrentLayer: function() {
-      return $("#"+this.opts.currentLayerId);
+      return $("#"+$.sketchyPad.opts.currentLayerId);
     },
     setCurrentLayer: function(id) {
-      this.opts.currentLayerId = id;
+      var layer = $("#"+id);
+      if (layer.length == 0) {
+        alert("Invalid layer id");
+      }
+      $.sketchyPad.opts.currentLayerId = layer.attr('id');
     },
     getRGBA: function() {
         var color = $.sketchyPad.opts.color;
@@ -118,18 +113,15 @@
            return "#" + color;
         }
         return color;
-       //return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
     },
     undo: function() {
       var canvas = $.sketchyPad.opts.undoBuffer.pop();
       if (canvas) {
+        //push current state into redo Buffer for the canvas-layer we are undo'ing
         $.sketchyPad.opts.redoBuffer.push($.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')]);
+        //set new current state into the canvas we just poppped
         $.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')] = canvas;
-        this.applyCanvasFromBuffer(canvas);
-        console.log("undo");
-        console.log($.sketchyPad.opts.undoBuffer);
-        console.log("redo");
-        console.log($.sketchyPad.opts.redoBuffer);
+        $.sketchyPad.applyCanvasFromBuffer(canvas);
         return $.sketchyPad.opts.undoBuffer.length;
       } else {
         return false;
@@ -147,13 +139,7 @@
         $.sketchyPad.opts.undoBuffer.push($.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')]);
         $.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')] = canvas;
 
-       // $.sketchyPad.opts.undoBuffer.push($.sketchyPad.opts.currentBuffer);
-      //  $.sketchyPad.opts.currentBuffer = canvas;
-        this.applyCanvasFromBuffer(canvas);
-        console.log("undo");
-        console.log($.sketchyPad.opts.undoBuffer);
-        console.log("redo");
-        console.log($.sketchyPad.opts.redoBuffer);
+        $.sketchyPad.applyCanvasFromBuffer(canvas);
         return $.sketchyPad.opts.redoBuffer.length;
       } else {
         return false;
@@ -164,66 +150,24 @@
       c.width  = $.sketchyPad.opts.width;
       c.height = $.sketchyPad.opts.height;
       c.setAttribute('data-layer-id', $.sketchyPad.opts.currentLayerId);
-      c.setAttribute('data-stroke-count', $.sketchyPad.opts.totalStrokes++);
       c.getContext('2d').drawImage($.sketchyPad.getCurrentLayer().get(0).getContext("2d").canvas,0,0);
       return c;
     },
     saveCanvasForRedo: function() {
-      $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId] = this.captureCurrentCanvas();
+      $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId] = $.sketchyPad.captureCurrentCanvas();
     },
     saveCanvasForUndo: function() {
-      var c = this.captureCurrentCanvas();
+      var c = $.sketchyPad.captureCurrentCanvas();
       if ($.sketchyPad.opts.undoBuffer.length == $.sketchyPad.opts.maxNumOfUndos) {
         $.sketchyPad.opts.undoBuffer.shift();
       }
       $.sketchyPad.opts.undoBuffer.push(c);
       $.sketchyPad.opts.redoBuffer = [];
-       console.log("undo");
-        console.log($.sketchyPad.opts.undoBuffer);
-        console.log("redo");
-        console.log($.sketchyPad.opts.redoBuffer);
-
-
     },
-    undoBufferPush: function() {
-      //increment totalStrokes
-      $.sketchyPad.opts.totalStrokes++;
-      //increment layerStrokes
-      $.sketchyPad.opts.layerStrokes[$.sketchyPad.opts.currentLayerId]++;
-
-      if ($.sketchyPad.opts.undoIndex < $.sketchyPad.opts.undoBuffer.length - 1) {
-        //remove anything behind undoIndex
-        $.sketchyPad.opts.undoBuffer = $.sketchyPad.opts.undoBuffer.slice(0,$.sketchyPad.opts.undoIndex+1);
-      }
-      //max of 10 undos
-      if ($.sketchyPad.opts.undoBuffer.length == $.sketchyPad.opts.maxNumOfUndos) {
-        $.sketchyPad.opts.undoBuffer.shift();
-      }
-
-
- //put a blank slate if this is the first mark on the layer
-      if ($.sketchyPad.opts.layerStrokes[$.sketchyPad.opts.currentLayerId] == 1) {
-        $.sketchyPad.opts
-      }
-
-
-
-
-      var c = document.createElement('canvas');
-      c.width  = $.sketchyPad.opts.width;
-      c.height = $.sketchyPad.opts.height;
-      c.setAttribute('data-layer-id', $.sketchyPad.getCurrentLayer().get(0).id);
-
-     
-      c.getContext('2d').drawImage($.sketchyPad.getCurrentLayer().get(0).getContext("2d").canvas,0,0);
-  
-      $.sketchyPad.opts.undoBuffer.push(c);
-      $.sketchyPad.opts.undoIndex = $.sketchyPad.opts.undoBuffer.length -1;
-    },
-
+   
     currentLayerToString: function() {
       
-      var canvas = this.getCurrentLayer().get(0);
+      var canvas = $.sketchyPad.getCurrentLayer().get(0);
       var type = "image/png";
       return canvas.toDataURL(type);
           
@@ -261,41 +205,38 @@
     registerEvents: function() {
 
 
-         $(window).resize(function() { offset = $.sketchyPad.opts.interactiveLayer.offset();  });
+         $(window).resize(function() { offset = $.sketchyPad.getInteractiveLayer().offset();  });
          
          //track mouse movements
          $(window).bind('mousemove', $.sketchyPad.onWindowMouseMove);
          //canvas detect mouse down -- register more events
-         $.sketchyPad.opts.interactiveLayer.bind('mousedown', $.sketchyPad.onCanvasMouseDown);
-         $.sketchyPad.opts.interactiveLayer.bind('mousemove', $.sketchyPad.drawCursor);
-         $.sketchyPad.opts.interactiveLayer.bind('mouseout', $.sketchyPad.clearInteractiveLayer);
+         $.sketchyPad.getInteractiveLayer().bind('mousedown', $.sketchyPad.onCanvasMouseDown);
+         $.sketchyPad.getInteractiveLayer().bind('mousemove', $.sketchyPad.drawCursor);
+         $.sketchyPad.getInteractiveLayer().bind('mouseout', $.sketchyPad.clearAndReturnInteractiveLayerContext);
 
     },
     
     onWindowMouseMove: function(event) {
-
-         
-
       //um.... why do we need currentPoint for?  when we have getBrushPoint?
-      //because the funcation cannot be called within brush, it has no event context
+      //because the function cannot be called within brush, it has no event context
          $.sketchyPad.opts.currentPoint = $.sketchyPad.getBrushPoint(event);
         
     },
-    clearInteractiveLayer: function() {
-      var upper = $.sketchyPad.opts.interactiveLayer.get(0).getContext('2d');
-   
-      //draw a circle at mouse position
-      upper.clearRect(0, 0, upper.canvas.width, upper.canvas.height);
+    getInteractiveLayer: function() {
+      return $("#"+$.sketchyPad.opts.interactiveLayerId);
+    },
+    getInteractiveLayerContext: function() {
       
+      return $.sketchyPad.getInteractiveLayer().get(0).getContext('2d');
+    },
+    clearAndReturnInteractiveLayerContext: function() {
+      var interActiveLayerContext = $.sketchyPad.getInteractiveLayerContext();
+      interActiveLayerContext.clearRect(0, 0, $.sketchyPad.opts.width, $.sketchyPad.opts.height);
+      return interActiveLayerContext;
     },
     drawCursor: function() {
     
-      var upper = $.sketchyPad.opts.interactiveLayer.get(0).getContext('2d');
-   
-      //draw a circle at mouse position
-      upper.clearRect(0, 0, upper.canvas.width, upper.canvas.height);
-      //  drawCurveStroke(upper);
-
+      var upper = $.sketchyPad.clearAndReturnInteractiveLayerContext();
       var new_point = $.sketchyPad.opts.currentPoint;
       if (new_point) {
           
@@ -318,11 +259,8 @@
     },
 
     onCanvasMouseDown: function(event) {
-      $.sketchyPad.opts.interactiveLayer.unbind('mousemove', $.sketchyPad.drawCursor);
-      //clear cursor
-      var interactiveLayerCanvas = $.sketchyPad.opts.interactiveLayer.get(0).getContext('2d');
-      interactiveLayerCanvas.clearRect(0,0,interactiveLayerCanvas.canvas.width, interactiveLayerCanvas.canvas.height);
-    
+      $.sketchyPad.getInteractiveLayer().unbind('mousemove', $.sketchyPad.drawCursor);
+      $.sketchyPad.clearAndReturnInteractiveLayerContext();
       //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
@@ -335,7 +273,7 @@
       brush.strokeEnd($.sketchyPad);
       $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
-      $.sketchyPad.opts.interactiveLayer.bind('mousemove', $.sketchyPad.drawCursor);      
+      $.sketchyPad.getInteractiveLayer().bind('mousemove', $.sketchyPad.drawCursor);      
     },
     
     onCanvasMouseMove: function(event) {

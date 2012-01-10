@@ -21,7 +21,7 @@ Smooth.prototype = {
     this.upper.lineCap = 'round';
 */
     var c = $(document.createElement('canvas'));
-    c.addClass("sketchypad_sketch_layer");
+    c.addClass($.sketchyPad.opts.canvasClassName);
     c.attr('width',$.sketchyPad.opts.width);
     c.attr('height',$.sketchyPad.opts.height);
     c.css('z-index',parseInt($.sketchyPad.getCurrentLayer().css('z-index'))+1);

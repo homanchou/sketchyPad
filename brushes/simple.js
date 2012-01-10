@@ -13,7 +13,8 @@ Simple.prototype = {
     this.context.globalCompositeOperation = 'source-over';
     this.context.lineCap = 'round';
   },
-  strokeStart: function(sketchyPad) { 
+  strokeStart: function(sketchyPad) {
+    sketchyPad.saveCanvasForUndo(); 
     this.init(sketchyPad);
     this.prevPoint = sketchyPad.opts.currentPoint;
   },
@@ -41,7 +42,7 @@ Simple.prototype = {
         this.context.closePath();
         this.context.fill();
     }
-    sketchyPad.undoBufferPush();
+    sketchyPad.saveCanvasForRedo();
  
   }
 };

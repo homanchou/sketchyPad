@@ -31,18 +31,20 @@ Smooth.prototype = {
     this.upper.globalCompositeOperation = 'source-over';
     this.upper.lineCap = 'round';
 
-    
-
 
   },
   strokeStart: function(sketchyPad) { 
+    sketchyPad.saveCanvasForUndo();
     this.init(sketchyPad);
     this.points.push(sketchyPad.opts.currentPoint);
   },
   drawCurveStroke: function(context) {
-      
-     //we need at least 4 sample points for this function to work
-     if (this.points.length > 0 && this.points.length < 4) {
+    
+     if (this.points.length < 1) {
+       return;
+     }
+
+     if (this.points.length < 6) {
         var point = this.points[0];
         context.beginPath();
         context.arc(point.x, point.y,parseInt(context.lineWidth)/2, 0, Math.PI * 2, true);
@@ -88,9 +90,9 @@ Smooth.prototype = {
     this.lower.fillStyle = sketchyPad.getRGBA();
     this.drawCurveStroke(this.lower);
     this.points = [];
-    //store to undo buffer
-    sketchyPad.undoBufferPush();
     this.tempLayer.remove();
+    sketchyPad.saveCanvasForRedo();
+
   }
 };
 

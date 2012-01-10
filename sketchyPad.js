@@ -26,7 +26,6 @@
        $.sketchyPad.initLocalStorage();
  
        $.sketchyPad.registerEvents();
-       $.sketchyPad.undoBufferPush(); 
        return element;
 
   }; //end fn.sketchyPad function
@@ -46,10 +45,14 @@
        brushType: "Simple",
        currentPoint: undefined,
        interactiveLayer: undefined,
+       redoBuffer:[],
        undoBuffer:[],
+       currentBuffer:{sketchypad_layer_a:undefined,sketchypad_layer_b:undefined,sketchypad_layer_c:undefined},
        undoIndex: -1,
        currentLayerId: 'sketchypad_layer_a',
-       maxNumOfUndos: 50
+       maxNumOfUndos: 50,
+       totalStrokes: 0,
+       layerStrokes: {sketchypad_layer_a:0,sketchypad_layer_b:0,sketchypad_layer_c:0}
     },
     
     //options
@@ -64,10 +67,16 @@
        /*
        TODO support multiple layers
         */
-       element.append("<canvas id='sketchypad_layer_c' class='sketchypad_sketch_layer' style='z-index:10' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
-       element.append("<canvas id='sketchypad_layer_b' class='sketchypad_sketch_layer' style='z-index:20' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+       var zIndex = 30;
+       for (var layer_id in $.sketchyPad.opts.layerStrokes) {
+          element.append("<canvas id='"+layer_id+"' class='sketchypad_sketch_layer' style='z-index:"+zIndex+"' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+          zIndex = zIndex - 10;
+       }
 
-       element.append("<canvas id='sketchypad_layer_a' class='sketchypad_sketch_layer' style='z-index:30' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+   //    element.append("<canvas id='sketchypad_layer_c' class='sketchypad_sketch_layer' style='z-index:10' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+   //    element.append("<canvas id='sketchypad_layer_b' class='sketchypad_sketch_layer' style='z-index:20' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
+
+   //    element.append("<canvas id='sketchypad_layer_a' class='sketchypad_sketch_layer' style='z-index:30' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
 
        element.append("<canvas id='sketchypad_interactive_layer' class='sketchypad_sketch_layer' style='z-index:50' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
      
@@ -112,44 +121,76 @@
        //return '#'+$.sketchyPad.toHex(color[0])+$.sketchyPad.toHex(color[1])+$.sketchyPad.toHex(color[2]);
     },
     undo: function() {
-      if ($.sketchyPad.opts.undoIndex < 1) {
-        //last undo, or no more undos
+      var canvas = $.sketchyPad.opts.undoBuffer.pop();
+      if (canvas) {
+        $.sketchyPad.opts.redoBuffer.push($.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')]);
+        $.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')] = canvas;
+        this.applyCanvasFromBuffer(canvas);
+        console.log("undo");
+        console.log($.sketchyPad.opts.undoBuffer);
+        console.log("redo");
+        console.log($.sketchyPad.opts.redoBuffer);
+        return $.sketchyPad.opts.undoBuffer.length;
+      } else {
         return false;
       }
-      var layer = $.sketchyPad.getCurrentLayer();
+    },
+    applyCanvasFromBuffer: function(canvas) {
+      var layer = $("#"+canvas.getAttribute('data-layer-id'));
       var ctx = layer.get(0).getContext("2d");
       ctx.clearRect ( 0 , 0 , $.sketchyPad.opts.width, $.sketchyPad.opts.height );
-
-
-      $.sketchyPad.opts.undoIndex--;
-      var c = $.sketchyPad.opts.undoBuffer[$.sketchyPad.opts.undoIndex];
-      ctx.drawImage(c, 0, 0);
-      //return number of undo's left
-      return $.sketchyPad.opts.undoIndex;
+      ctx.drawImage(canvas, 0, 0);
     },
     redo: function() {
-     
-      if ($.sketchyPad.opts.undoIndex == $.sketchyPad.opts.undoBuffer.length - 1) {
-        //last redo
+      var canvas = $.sketchyPad.opts.redoBuffer.pop();
+      if (canvas) {
+        $.sketchyPad.opts.undoBuffer.push($.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')]);
+        $.sketchyPad.opts.currentBuffer[canvas.getAttribute('data-layer-id')] = canvas;
+
+       // $.sketchyPad.opts.undoBuffer.push($.sketchyPad.opts.currentBuffer);
+      //  $.sketchyPad.opts.currentBuffer = canvas;
+        this.applyCanvasFromBuffer(canvas);
+        console.log("undo");
+        console.log($.sketchyPad.opts.undoBuffer);
+        console.log("redo");
+        console.log($.sketchyPad.opts.redoBuffer);
+        return $.sketchyPad.opts.redoBuffer.length;
+      } else {
         return false;
       }
-      var layer = $.sketchyPad.getCurrentLayer();
-      var ctx = layer.get(0).getContext("2d");
-      ctx.clearRect ( 0 , 0 , $.sketchyPad.opts.width, $.sketchyPad.opts.height );
-
-
-      $.sketchyPad.opts.undoIndex++;
-      var c = $.sketchyPad.opts.undoBuffer[$.sketchyPad.opts.undoIndex];
-      ctx.drawImage(c, 0, 0);
-
-       return $.sketchyPad.opts.undoBuffer.length -1 - $.sketchyPad.opts.undoIndex;
-
     },
-    reset: function() {
-       $.sketchyPad.opts.undoBuffer = [];
-      $.sketchyPad.opts.undoIndex = -1;
+    captureCurrentCanvas: function() {
+      var c = document.createElement('canvas');
+      c.width  = $.sketchyPad.opts.width;
+      c.height = $.sketchyPad.opts.height;
+      c.setAttribute('data-layer-id', $.sketchyPad.opts.currentLayerId);
+      c.setAttribute('data-stroke-count', $.sketchyPad.opts.totalStrokes++);
+      c.getContext('2d').drawImage($.sketchyPad.getCurrentLayer().get(0).getContext("2d").canvas,0,0);
+      return c;
+    },
+    saveCanvasForRedo: function() {
+      $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId] = this.captureCurrentCanvas();
+    },
+    saveCanvasForUndo: function() {
+      var c = this.captureCurrentCanvas();
+      if ($.sketchyPad.opts.undoBuffer.length == $.sketchyPad.opts.maxNumOfUndos) {
+        $.sketchyPad.opts.undoBuffer.shift();
+      }
+      $.sketchyPad.opts.undoBuffer.push(c);
+      $.sketchyPad.opts.redoBuffer = [];
+       console.log("undo");
+        console.log($.sketchyPad.opts.undoBuffer);
+        console.log("redo");
+        console.log($.sketchyPad.opts.redoBuffer);
+
+
     },
     undoBufferPush: function() {
+      //increment totalStrokes
+      $.sketchyPad.opts.totalStrokes++;
+      //increment layerStrokes
+      $.sketchyPad.opts.layerStrokes[$.sketchyPad.opts.currentLayerId]++;
+
       if ($.sketchyPad.opts.undoIndex < $.sketchyPad.opts.undoBuffer.length - 1) {
         //remove anything behind undoIndex
         $.sketchyPad.opts.undoBuffer = $.sketchyPad.opts.undoBuffer.slice(0,$.sketchyPad.opts.undoIndex+1);
@@ -158,9 +199,22 @@
       if ($.sketchyPad.opts.undoBuffer.length == $.sketchyPad.opts.maxNumOfUndos) {
         $.sketchyPad.opts.undoBuffer.shift();
       }
+
+
+ //put a blank slate if this is the first mark on the layer
+      if ($.sketchyPad.opts.layerStrokes[$.sketchyPad.opts.currentLayerId] == 1) {
+        $.sketchyPad.opts
+      }
+
+
+
+
       var c = document.createElement('canvas');
       c.width  = $.sketchyPad.opts.width;
       c.height = $.sketchyPad.opts.height;
+      c.setAttribute('data-layer-id', $.sketchyPad.getCurrentLayer().get(0).id);
+
+     
       c.getContext('2d').drawImage($.sketchyPad.getCurrentLayer().get(0).getContext("2d").canvas,0,0);
   
       $.sketchyPad.opts.undoBuffer.push(c);

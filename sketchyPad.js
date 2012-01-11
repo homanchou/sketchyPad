@@ -118,7 +118,8 @@
          localStorage.sketchypad_brush_type = brushType;
          brush = b;
        } else {
-         alert('Invalid BrushType');
+         alert('setBrushType: "'+ brushType +'" Invalid BrushType');
+
        }
     },
 
@@ -328,7 +329,7 @@
 
     initLocalStorage: function() {
        $.sketchyPad.setColor(localStorage.sketchypad_color || $.sketchyPad.opts.color);
-       $.sketchyPad.setBrushType(localStorage.sketchypad_brush_type || $.sketchyPad.opts.brushType);
+       $.sketchyPad.setBrushType(localStorage.sketchypad_brush_type || $.sketchyPad.opts.brushTypes[$.sketchyPad.opts.brushTypes.length-1]);
        $.sketchyPad.setBrushSize(localStorage.sketchypad_brush_size || $.sketchyPad.opts.brushSize);
        $.sketchyPad.setOpacity(localStorage.sketchypad_opacity || $.sketchyPad.opts.opacity);
     }

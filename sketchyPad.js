@@ -51,7 +51,8 @@
        undoBuffer:[],
        currentBuffer:{},
        numOfLayers:3,
-       currentLayerId: 'sketchypad_layer_0',
+       layerIdPrefix: 'sketchypad_layer_',
+       currentLayerId: undefined,
        interactiveLayerId: 'sketchypad_interactive_layer',
        canvasClassName: 'sketchypad_sketch_layer',
        maxNumOfUndos: 50,
@@ -74,6 +75,7 @@
           element.append("<canvas id='"+layer_id+"' class='"+$.sketchyPad.opts.canvasClassName+"' style='z-index:"+zIndex+"' width='"+$.sketchyPad.opts.width+"' height='"+$.sketchyPad.opts.height+"'>Your browser does not support canvas</canvas>")
           zIndex -= 10; 
        }
+       $.sketchyPad.opts.currentLayerId = $.sketchyPad.opts.layerIdPrefix + '0';
 
     
     },
@@ -177,11 +179,7 @@
     },
     saveCanvasForRedo: function() {
       $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId] = $.sketchyPad.captureCurrentCanvas();
-      var img = document.createElement('img');
-      img.setAttribute('src', $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId].toDataURL());
-      console.log("capturing: " + $.sketchyPad.opts.currentLayerId);
-      console.log(img);
-
+     
     },
     saveCanvasForUndo: function() {
       var c = $.sketchyPad.captureCurrentCanvas();
@@ -200,8 +198,27 @@
           
     },
     toString: function() {
-      //TODO get all the layers
-      return $.sketchyPad.currentLayerToString().replace('data:image/png;base64,', '');
+      //merge all the layers
+      var m = document.createElement('canvas');
+      m.width  = $.sketchyPad.opts.width;
+      m.height = $.sketchyPad.opts.height;
+      var mc = m.getContext('2d');
+      
+      //collect all the canvas
+      $("canvas."+$.sketchyPad.opts.canvasClassName).sort(function(a,b){return (a.style.zIndex - b.style.zIndex)}).each(function(){
+          var c = $(this);
+          mc.drawImage(c.get(0).getContext("2d").canvas, 0, 0);
+      });
+
+      return m.toDataURL("image/png").replace('data:image/png;base64,', '');
+
+      //take a peek
+      //var img = document.createElement('img');
+      //img.setAttribute('src', mc.canvas.toDataURL());
+      //console.log(img);
+
+
+     // return $.sketchyPad.currentLayerToString().replace('data:image/png;base64,', '');
 
     }
     ,

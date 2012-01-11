@@ -19,7 +19,10 @@
        $.sketchyPad.createLayers();
        
        offset = element.offset();
- 
+       
+       //instantiate the brush classes
+       $.sketchyPad.initializeBrushes();
+
        //restore or set color, brushsize, brushtype, opacity from localStorage
        $.sketchyPad.initLocalStorage();
        //event listeners
@@ -40,9 +43,10 @@
        brushSize: 2,
        opacity: 0.7,
        color: '#454545',
-       brushType: "Simple",
        currentPoint: undefined,
        interactiveLayer: undefined,
+       brushTypes:[],
+       brushes:{},
        redoBuffer:[],
        undoBuffer:[],
        currentBuffer:{},
@@ -91,11 +95,29 @@
         }
         return "rgba("+parseInt(color.substring(0,2),16)+","+parseInt(color.substring(2,4),16)+","+parseInt(color.substring(4,6),16)+","+opacity+")";
     },
-    
-    setBrush: function(brushType) {
-        localStorage.sketchypad_brush_type = brushType;
-      //  var context = $.sketchyPad.opts.interactiveLayer.get(0).getContext("2d");
-        brush = eval("new " + brushType + "($.sketchyPad)");    
+    registerBrushType: function(brushType){
+       try {
+         var b = eval("new " + brushType + "()");   
+         $.sketchyPad.opts.brushes[brushType] = b;
+         brush = b;
+       } catch(e) {
+         alert("Error evaluating brush:" + brushType + " " + e);
+       }
+    },
+    initializeBrushes: function() {
+      for(var i=0; i < $.sketchyPad.opts.brushTypes.length; i++) {
+        $.sketchyPad.registerBrushType($.sketchyPad.opts.brushTypes[i]);
+      }
+    },
+    setBrushType: function(brushType) {
+       //find the brush
+       var b = $.sketchyPad.opts.brushes[brushType];
+       if (b) {
+         localStorage.sketchypad_brush_type = brushType;
+         brush = b;
+       } else {
+         alert('Invalid BrushType');
+       }
     },
 
     getBrushType: function() {
@@ -155,6 +177,11 @@
     },
     saveCanvasForRedo: function() {
       $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId] = $.sketchyPad.captureCurrentCanvas();
+      var img = document.createElement('img');
+      img.setAttribute('src', $.sketchyPad.opts.currentBuffer[$.sketchyPad.opts.currentLayerId].toDataURL());
+      console.log("capturing: " + $.sketchyPad.opts.currentLayerId);
+      console.log(img);
+
     },
     saveCanvasForUndo: function() {
       var c = $.sketchyPad.captureCurrentCanvas();
@@ -264,25 +291,27 @@
       //additional handlers bound at window level, that way if pen exits canvas border, we can still receive events
       $(window).bind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).bind('mousemove', $.sketchyPad.onCanvasMouseMove);
-    
-      brush.strokeStart($.sketchyPad);
-     // brush.stroke($.sketchyPad);
+
+      $.sketchyPad.saveCanvasForUndo();
+      brush.strokeStart();
     },
 
     onWindowMouseUp: function(event) {
-      brush.strokeEnd($.sketchyPad);
+      brush.strokeEnd();
+      $.sketchyPad.saveCanvasForRedo();
+
       $(window).unbind('mouseup', $.sketchyPad.onWindowMouseUp);
       $(window).unbind('mousemove', $.sketchyPad.onCanvasMouseMove);
       $.sketchyPad.getInteractiveLayer().bind('mousemove', $.sketchyPad.drawCursor);      
     },
     
     onCanvasMouseMove: function(event) {
-      brush.stroke($.sketchyPad);
+      brush.stroke();
     },
 
     initLocalStorage: function() {
        $.sketchyPad.setColor(localStorage.sketchypad_color || $.sketchyPad.opts.color);
-       $.sketchyPad.setBrush(localStorage.sketchypad_brush_type || $.sketchyPad.opts.brushType);
+       $.sketchyPad.setBrushType(localStorage.sketchypad_brush_type || $.sketchyPad.opts.brushType);
        $.sketchyPad.setBrushSize(localStorage.sketchypad_brush_size || $.sketchyPad.opts.brushSize);
        $.sketchyPad.setOpacity(localStorage.sketchypad_opacity || $.sketchyPad.opts.opacity);
     }

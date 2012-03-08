@@ -14,7 +14,7 @@
               
        element = this; 
        //add some stylings required by sketchyPad
-       $.sketchyPad.injectCSS();
+       //$.sketchyPad.injectCSS();
        //inject canvas elements into the page with stylings to line them up
        $.sketchyPad.createLayers();
        

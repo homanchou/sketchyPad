@@ -1,106 +1,62 @@
-(function($){
-  
-   $.fn.jsCanvasPaint = function(options){
-       var element = this;
-       $.jsCanvasPaint.opts = $.extend({}, $.jsCanvasPaint.defaults, options);       
-       $.jsCanvasPaint.init(element);
-       return element;
+const REV=1;
+var SCREEN_WIDTH=window.innerWidth;
+var SCREEN_HEIGHT=window.innerHeight;
+var toolX, toolY, toolSpeed, prevtoolX, prevtoolY, time, prevTime;
+var touchEnabled = ('ontouchstart' in window);
+var toolInUse = false;
 
-  }; //end fn.jsCanvasPaint function
-
- //http://ross.posterous.com/2008/08/19/iphone-touch-events-in-javascript/
-function touchHandler(event)
-{
-    var touches = event.changedTouches,
-        first = touches[0],
-        type = "";
-         switch(event.type)
-    {
-        case "touchstart": type ="mousedown"; break;
-        case "touchmove":  type="mousemove"; break;        
-        case "touchend":   type="mouseup"; break;
-        default: return;
-    }
-
-             //initMouseEvent(type, canBubble, cancelable, view, clickCount, 
-    //           screenX, screenY, clientX, clientY, ctrlKey, 
-    //           altKey, shiftKey, metaKey, button, relatedTarget);
-    
-    var simulatedEvent = document.createEvent("MouseEvents");
-        simulatedEvent.initMouseEvent(type, true, true, window, 1, 
-                              first.screenX, first.screenY, 
-                              first.clientX, first.clientY, false, 
-                              false, false, false, 0/*left*/, null);
-
-    first.target.dispatchEvent(simulatedEvent);
-
-    event.preventDefault();
+function init() {
+  container = document.createElement("div");
+  document.body.appendChild(container);
+  canvas = document.createElement("canvas");
+  canvas.width = SCREEN_WIDTH;
+  canvas.height = SCREEN_HEIGHT;
+  canvas.style.cursor = "crosshair";
+  container.appendChild(canvas);
 }
 
-  var canvas = undefined; 
+function onToolStart(e){
+  toolX = e.clientX;
+  toolY = e.clientY;
+  time = (new Date()).getTime();
+  toolInUse = true;
+}
 
-  function myPrint(text) {
-    $('#drawing_area').append(text);
-  }
+function onToolEnd(e){
+  toolInUse = false;
+}
 
-  function toolStart(e){
-    myPrint("start: " + e.offsetX + ", " + e.offsetY);
-    canvas[0].addEventListener('mousemove', toolMove, false);
-    document.addEventListener('mouseup', toolEnd, false);
-  }
-  function toolMove(e){
-    myPrint("move: " + e.offsetX + ", " + e.offsetY);
+function onToolMove(e) {
+    if (toolInUse == false) { return; }
 
-  }
-  function toolEnd(e){
-     myPrint("move listener remove");
-    canvas[0].removeEventListener('mousemove', toolMove, false);
-  }
+    prevtoolX = toolX;
+    prevtoolY = toolY;
+    prevTime = time;
 
-  
-  $.jsCanvasPaint = {
+    toolX = e.clientX;
+    toolY = e.clientY;
+    time = (new Date()).getTime();
     
-    //default settings
-    defaults : {
-    },
-    
-    //options merged with defaults will be set here
-    opts: {},
+    var deltaX = Math.abs(toolX - prevtoolX);
+    var deltaY = Math.abs(toolY - prevtoolY);
+    var deltaTime = time - prevTime;
+    var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    toolSpeed = 1000 * distance / deltaTime;
+    console.log("x: " + toolX + ", y: " + toolY + " deltaX: " + deltaX + " deltaY: " + deltaY + " deltaTime: " + deltaTime +
+      " distance: " + distance + " speed: " + toolSpeed);
+}
 
 
-    init: function(element){
-      canvas = $('<canvas></canvas>');
-      element.append(canvas);
-      this.registerEvents();
-    },
-
-
-
-    registerEvents: function() {
-
-if ('ontouchstart' in window) {
-
-    document.addEventListener("touchstart", touchHandler, true);
-    document.addEventListener("touchmove", touchHandler, true);
-    document.addEventListener("touchend", touchHandler, true);
-    document.addEventListener("touchcancel", touchHandler, true);    
-
-} 
-  canvas[0].addEventListener('mousedown', toolStart, false);
-
-
-/*
-$('#myCanvas').bind('mouseup', brushEnd);
-$('#myCanvas').bind('mousemove', brushMove);
-$('#myCanvas')[0].addEventListener('touchstart',brushStart,false);
-$('#myCanvas')[0].addEventListener('touchend',brushEnd,false);
-$('#myCanvas')[0].addEventListener('touchmove',brushMove,false);
-*/
-        
-    },
-    setTool: function(){
-    }
+function jsCanvasPaint(){
+  init();
+  if (touchEnabled) {
+    window.addEventListener("touchstart", onToolStart, false);
+    window.addEventListener("touchend", onToolEnd, false);
+    window.addEventListener("touchmove", onToolMove, false);
+  } else {
+    window.addEventListener("mouseup", onToolEnd, false);
+    window.addEventListener("mousedown", onToolStart, false);
+    window.addEventListener("mousemove", onToolMove, false);
   }
-
-})(jQuery);
+}
 

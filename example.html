@@ -1,42 +1,27 @@
 <!DOCTYPE html>
 <html>
-	<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    
-		<title>List Example</title>
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-		<script src="jsCanvasPaint.js"></script>
-		
-		<script>
-			$(function() {
-				$('#drawing_area').jsCanvasPaint({
-				});
-			});
-		</script>
-		
-	</head>
-	<body>
-		<style>
-          body {
-            border:0;
-            padding:0;
-            margin:0;
+<head>
+<meta charset="utf-8"><meta name="description" content="Procedural Drawing Tool">
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon-precomposed" href="appIcon.png">
+<style type="text/css">
+body { margin: 0px; overflow: hidden; } 
+</style>
+<script src="jsCanvasPaint.js"></script>
 
-          }
-          div {
-            width:500px;
-            margin:auto;
-          }
-          canvas {
-            border:3px dashed orange;
-            width:300px;
-            height:300px;
-            cursor: crosshair;
-          }
-        </style>
-		<div id="drawing_area">
-		</div>
-        <a href="http://www.google.com">test leaving the page to goto google</a>
-	</body>
+<script>
+window.onload = function(){
+ jsCanvasPaint();
+}
+</script>
+			
+</head>
+
+<body>
+</body>
+
+
+
 </html>
 

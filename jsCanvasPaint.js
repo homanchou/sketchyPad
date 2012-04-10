@@ -4,9 +4,19 @@ var container, canvas;
 var SCREEN_HEIGHT=window.innerHeight;
 var toolX, toolY, toolSpeed, prevtoolX, prevtoolY, time, prevTime;
 var touchEnabled = ('ontouchstart' in window);
-var toolInUse = false;
-var toolUseData = []; //save each stroke
-var toolCurrent;
+var toolTotalData = []; //save each stroke
+var toolStrokeData, toolInUse;
+
+function dataToCanvas(data){
+  var context = canvas.getContext('2d');
+  context.beginPath();
+  context.moveTo(data[0].x, data[0].y);
+
+  for (var i = 1; i < data.length; i++) {
+    context.lineTo(data[i].x, data[i].y);
+  }
+  context.stroke();
+}
 
 function init() {
   container = document.createElement("div");
@@ -19,29 +29,42 @@ function init() {
 }
 
 function onToolStart(e){
-  toolX = e.clientX;
-  toolY = e.clientY;
+  if (touchEnabled) {
+    toolX = e.touches[0].pageX;
+    toolY = e.touches[0].pageY;
+  } else {
+    toolX = e.clientX;
+    toolY = e.clientY;
+  }
   time = (new Date()).getTime();
+  toolStrokeData = [];
   toolInUse = true;
-  $('canvas').css('background-color','red');
+//  $('canvas').css('background-color','red');
 }
 
 function onToolEnd(e){
+  toolTotalData.push(toolStrokeData);
+//  $('canvas').css('background-color','white');
+  dataToCanvas(toolStrokeData);
   toolInUse = false;
-  $('canvas').css('background-color','white');
-
 }
 
 function onToolMove(e) {
-    e.preventDefault();
+    e.preventDefault(); //prevent overscroll
     if (toolInUse == false) { return; }
 
     prevtoolX = toolX;
     prevtoolY = toolY;
     prevTime = time;
 
-    toolX = e.clientX;
-    toolY = e.clientY;
+    if (touchEnabled) { 
+      toolX = e.touches[0].pageX
+      toolY = e.touches[0].pageY
+    } else {
+      toolX = e.clientX;
+      toolY = e.clientY;
+    } 
+
     time = (new Date()).getTime();
     
     var deltaX = Math.abs(toolX - prevtoolX);
@@ -51,6 +74,7 @@ function onToolMove(e) {
     toolSpeed = 1000 * distance / deltaTime;
     console.log("x: " + toolX + ", y: " + toolY + " deltaX: " + deltaX + " deltaY: " + deltaY + " deltaTime: " + deltaTime +
       " distance: " + distance + " speed: " + toolSpeed);
+    toolStrokeData.push({x:toolX,y:toolY,speed:toolSpeed});
 }
 
 

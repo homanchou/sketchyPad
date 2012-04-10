@@ -1,9 +1,12 @@
 const REV=1;
 var SCREEN_WIDTH=window.innerWidth;
+var container, canvas;
 var SCREEN_HEIGHT=window.innerHeight;
 var toolX, toolY, toolSpeed, prevtoolX, prevtoolY, time, prevTime;
 var touchEnabled = ('ontouchstart' in window);
 var toolInUse = false;
+var toolUseData = []; //save each stroke
+var toolCurrent;
 
 function init() {
   container = document.createElement("div");
@@ -20,13 +23,17 @@ function onToolStart(e){
   toolY = e.clientY;
   time = (new Date()).getTime();
   toolInUse = true;
+  $('canvas').css('background-color','red');
 }
 
 function onToolEnd(e){
   toolInUse = false;
+  $('canvas').css('background-color','white');
+
 }
 
 function onToolMove(e) {
+    e.preventDefault();
     if (toolInUse == false) { return; }
 
     prevtoolX = toolX;

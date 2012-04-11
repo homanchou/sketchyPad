@@ -6,15 +6,33 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon-precomposed" href="appIcon.png">
 <style type="text/css">
-body { margin: 0px; overflow: hidden; background-image:url('bg.jpg'); }
+body { margin: 0px; overflow: hidden; background-image:url('bg.jpg'); cursor:crosshair; }
 #canvas, #staging {position:absolute;top:0;left:0;}
+#menu { position:absolute;top:0;right:0;
+width:80px;
+height:80px;z-index:100;
+padding:0;margin:0;
+background-image:url('tools.jpg');
+background-repeat: no-repeat;
+cursor:pointer;
+}
+#tools {
+position:absolute;
+right:0;top:0;
+border:5px dashed gray;
+width:300px;
+background-color:white;
+z-index:200;
+display:none;
+}
 </style>
 <script src="jquery-1.7.1.min.js"></script>
 <script src="jsCanvasPaint.js"></script>
+<script src="brushes/pencil.js"></script>
 
 <script>
 window.onload = function(){
- jsCanvasPaint();
+ jsCanvasPaint(['pencil']);
 }
 </script>
 			

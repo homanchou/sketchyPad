@@ -1,23 +1,16 @@
-function sketchy(a) {
-    this.init(a)
+
+
+
+function pencil(context) {
+    this.init(context)
 }
-sketchy.prototype = {
+pencil.prototype = {
     context: null,
-    prevMouseX: null,
-    prevMouseY: null,
-    points: null,
-    count: null,
-    init: function (a) {
-        this.context = a;
+    init: function (context) {
+        this.context = context;
         this.context.globalCompositeOperation = "source-over";
-        this.points = new Array();
-        this.count = 0
     },
     destroy: function () {},
-    strokeStart: function (b, a) {
-        this.prevMouseX = b;
-        this.prevMouseY = a
-    },
     stroke: function (f, c) {
         var e, b, a, g;
         this.points.push([f, c]);

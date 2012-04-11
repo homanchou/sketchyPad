@@ -1,40 +1,42 @@
-
-
-
-function pencil(context) {
-    this.init(context)
+function pencil() {
+    this.init()
 }
 pencil.prototype = {
-    context: null,
-    init: function (context) {
-        this.context = context;
-        this.context.globalCompositeOperation = "source-over";
-    },
-    destroy: function () {},
-    stroke: function (f, c) {
-        var e, b, a, g;
-        this.points.push([f, c]);
-        this.context.lineWidth = BRUSH_SIZE;
-        this.context.strokeStyle = "rgba(" + COLOR[0] + ", " + COLOR[1] + ", " + COLOR[2] + ", " + 0.05 * BRUSH_PRESSURE + ")";
-        this.context.beginPath();
-        this.context.moveTo(this.prevMouseX, this.prevMouseY);
-        this.context.lineTo(f, c);
-        this.context.stroke();
-        for (e = 0; e < this.points.length; e++) {
-            b = this.points[e][0] - this.points[this.count][0];
-            a = this.points[e][1] - this.points[this.count][1];
-            g = b * b + a * a;
-            if (g < 4000 && Math.random() > (g / 2000)) {
-                this.context.beginPath();
-                this.context.moveTo(this.points[this.count][0] + (b * 0.3), this.points[this.count][1] + (a * 0.3));
-                this.context.lineTo(this.points[e][0] - (b * 0.3), this.points[e][1] - (a * 0.3));
-                this.context.stroke()
-            }
+    init: function () {},
+    strokeStart: function() {},
+    dataToContext: function(context, data){
+        context.lineWidth = 1;
+        context.strokeStyle = "rgba(20,20,20,0.1)";
+        context.globalCompositeOperation = "source-over"
+
+        context.beginPath();
+        context.moveTo(data[0].x, data[0].y);
+        for (var i = 1; i < data.length; i++) {
+          context.lineTo(data[i].x, data[i].y);
         }
-        this.prevMouseX = f;
-        this.prevMouseY = c;
-        this.count++
+        context.stroke();
+    },  
+
+    stroke: function () {
+    
+      var context = staging.getContext('2d');
+      context.clearRect ( 0 , 0 , SCREEN_WIDTH , SCREEN_HEIGHT );
+      this.dataToContext(context, toolStrokeData);
+    
+        
     },
-    strokeEnd: function () {}
+    strokeEnd: function () {
+    
+            //transfer image from staging to canvas
+      if ( toolStrokeData.length > 0) {
+        toolTotalData.push(toolStrokeData);
+        var context = canvas.getContext('2d');
+        this.dataToContext(context, toolStrokeData);
+        var context = staging.getContext('2d');
+        context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+      }
+
+    
+    }
 };
 

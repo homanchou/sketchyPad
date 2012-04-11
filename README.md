@@ -11,10 +11,10 @@ Simple interface for drawing online without extra clutter.  Select a tool.  Use 
 
 Specs:
 
-- it should create a background canvas
-- it should load background canvas with paper texture
-- it should create a foreground canvas to receive completed tool gesture
-- it should create a staging canvas to animate the tool as it is being used
+- it should have a background image on the body via css
+- it should save background image into final saved image
+- it should have a main canvas to receive paint brush and drawing
+- it should have a foreground canvas 'staging' to animate brush transitions as you draw
 - it should set canvases to full screen
 - it should bind to touch events for touch capable devices
 - it should bind to mouse events for desktop browsers

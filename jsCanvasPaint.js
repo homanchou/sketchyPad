@@ -2,7 +2,7 @@ const REV=1;
 var SCREEN_WIDTH=window.innerWidth;
 var container, canvas;
 var SCREEN_HEIGHT=window.innerHeight;
-var toolX, toolY, toolSpeed, prevtoolX, prevtoolY, time, prevTime;
+var toolX, toolY, toolSpeed, toolPrevX, toolPrevY, time, prevTime;
 var touchEnabled = ('ontouchstart' in window);
 var toolTotalData = []; //save each stroke
 var toolStrokeData;
@@ -12,19 +12,9 @@ var toolMinX = 2000;
 var toolMinY = 2000;
 var toolInUse = false;
 var menuUp = false;
+var tools = {};
+var currentTool;
 
-function dataToContext(context, data){
-  context.lineWidth = 1;
-  context.strokeStyle = "rgba(20,20,20,0.1)";
-  context.globalCompositeOperation = "source-over"
-
-  context.beginPath();
-  context.moveTo(data[0].x, data[0].y);
-  for (var i = 1; i < data.length; i++) {
-    context.lineTo(data[i].x, data[i].y);
-  }
-  context.stroke();
-}
 
 function playBack(SketchData) {
   for(var i=0; i < SketchData.length; i++) {
@@ -48,14 +38,14 @@ function init() {
   document.body.appendChild(container);
   canvas = addFullScreenCanvas("canvas");
   staging = addFullScreenCanvas("staging");
-  menu = document.createElement("div");
-  menu.id = "menu";
-  document.body.appendChild(menu);
+  var m = document.createElement("div");
+  m.id = "menu";
+  document.body.appendChild(m);
   //refactor to none jQuery ?
-  tools = $('<div id="tools"></div>');
-  tools.append('brushes');
-  tools.append('<canvas id="color_palette"></canvas>');
-  $('body').append(tools);
+  var t = $('<div id="tools"></div>');
+  t.append('brushes');
+  t.append('<canvas id="color_palette"></canvas>');
+  $('body').append(t);
   
  
 }
@@ -86,13 +76,11 @@ function onToolStart(e){
   }
   if (menuUp == true) { return; }
   
-    console.log(e.target);
-  console.log('brush start');
   toolInUse = true;
   updateXY(e);
   toolStrokeData = [{x:toolX,y:toolY,speed:0}];
-
-//  $('canvas').css('background-color','red');
+  
+  currentTool.strokeStart();
 }
 
 function onToolEnd(e){
@@ -101,14 +89,9 @@ function onToolEnd(e){
   console.log('toolend');
 //  $('canvas').css('background-color','white');
   toolInUse = false;
+  
+  currentTool.strokeEnd();
 
-  if ( toolStrokeData.length > 0) {
-    toolTotalData.push(toolStrokeData);
-    var context = canvas.getContext('2d');
-    dataToContext(context, toolStrokeData);
-    var context = staging.getContext('2d');
-    context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-  }
 }
 
 //calculates tool speed
@@ -118,14 +101,14 @@ function onToolMove(e) {
     e.preventDefault(); //prevent overscroll
     if (toolInUse == false) { return; }
 
-    prevtoolX = toolX;
-    prevtoolY = toolY;
+    toolPrevX = toolX;
+    toolPrevY = toolY;
     prevTime = time;
 
     updateXY(e);
         
-    var deltaX = Math.abs(toolX - prevtoolX);
-    var deltaY = Math.abs(toolY - prevtoolY);
+    var deltaX = Math.abs(toolX - toolPrevX);
+    var deltaY = Math.abs(toolY - toolPrevY);
     var deltaTime = time - prevTime;
     var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
     toolSpeed = Math.ceil(1000 * distance / deltaTime);
@@ -133,20 +116,20 @@ function onToolMove(e) {
 //      " distance: " + distance + " speed: " + toolSpeed);
   
     toolStrokeData.push({x:toolX,y:toolY,speed:toolSpeed});
-    
-    stageToolUse(); 
-}
-
-//draws current tool usage onto the screen as we use the tool, clearing canvas each time
-function stageToolUse(){
-  var context = staging.getContext('2d');
-  context.clearRect ( 0 , 0 , SCREEN_WIDTH , SCREEN_HEIGHT );
-  dataToContext(context, toolStrokeData);
+    currentTool.stroke();
 }
 
 
-function jsCanvasPaint(){
-  init();
+
+function jsCanvasPaint(brush_names){
+
+   for(var i = 0; i < brush_names.length; i++){
+    tools[brush_names[i]] = eval('new ' + brush_names[i] + '()');
+   }
+
+  currentTool = tools['pencil'];
+  init(); 
+
   if (touchEnabled) {
     document.addEventListener("touchstart", onToolStart, false);
     document.addEventListener("touchend", onToolEnd, false);

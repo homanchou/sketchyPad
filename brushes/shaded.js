@@ -7,7 +7,7 @@ shaded.prototype = {
     strokeStart: function() {
         this.ctx = canvas.getContext('2d');
         this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = "rgba(20,20,20,0.1)";
+        this.ctx.strokeStyle = "rgba(20,20,20,0.2)";
         this.ctx.globalCompositeOperation = "source-over";
     },
     /*
@@ -20,12 +20,12 @@ shaded.prototype = {
         ctx.stroke();
     },*/
     drawAdditional: function() {
+        var prevOpacity = this.ctx.strokeStyle;
         this.ctx.strokeStyle = "rgba(20,20,20,0.05)";
         var prevSlope = 0;
         var final_angle = Math.atan2(toolPrevX - toolX, toolPrevY - toolY);
    //     console.log("master point ("+toolX+","+toolY+") " + "final angle:" + final_angle);
-        var lookBack = Math.ceil(20 * toolSpeed/1000);
-        console.log(lookBack);
+        var lookBack = 2 + Math.ceil(20 * toolSpeed/500);
         for (var i = Math.max(0,toolStrokeData.length - lookBack); i < toolStrokeData.length - 1; i++) {
 
             var deltaX = toolStrokeData[i].x - toolX;
@@ -38,7 +38,7 @@ shaded.prototype = {
             angle_diff = Math.abs(final_angle - angle);
         //    console.log(angle_diff);
         //make more connections when drawing fast, make less connects when drawing slow
-            if (sudoDistance < 1000 && angle_diff < 0.4 ) {
+            if (sudoDistance < 2000 && angle_diff < 0.9 ) {
                 this.ctx.beginPath();
                 var noise = 5 ;
                 if (deltaX == 0) {deltaX = noise};
@@ -51,7 +51,7 @@ shaded.prototype = {
                 this.ctx.stroke()
             }
         }
-        this.ctx.strokeStyle = "rgba(20,20,20,0.1)";
+        this.ctx.strokeStyle = prevOpacity;
 
 
     
@@ -59,13 +59,12 @@ shaded.prototype = {
     stroke: function () {
     
         //this.ctxFront.clearRect ( 0 , 0 , SCREEN_WIDTH , SCREEN_HEIGHT );
+      
         this.ctx.beginPath();
         this.ctx.moveTo(toolPrevX, toolPrevY);
         this.ctx.lineTo(toolX, toolY);
         this.ctx.stroke();
-        console.log('single stroke start');
         this.drawAdditional();
-        console.log('single stroke end');
 
    //     this.dataToContext(this.ctxFront, toolStrokeData);        
         

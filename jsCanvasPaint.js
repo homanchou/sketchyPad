@@ -127,7 +127,7 @@ function jsCanvasPaint(brush_names){
     tools[brush_names[i]] = eval('new ' + brush_names[i] + '()');
    }
 
-  currentTool = tools['pencil'];
+  currentTool = tools['shaded'];
   init(); 
 
   if (touchEnabled) {

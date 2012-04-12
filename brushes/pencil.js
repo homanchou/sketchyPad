@@ -3,26 +3,29 @@ function pencil() {
 }
 pencil.prototype = {
     init: function () {},
-    strokeStart: function() {},
-    dataToContext: function(context, data){
-        context.lineWidth = 1;
-        context.strokeStyle = "rgba(20,20,20,0.1)";
-        context.globalCompositeOperation = "source-over"
-
-        context.beginPath();
-        context.moveTo(data[0].x, data[0].y);
+    ctxFront: undefined,
+    ctxBack: undefined,
+    strokeStart: function() {
+        this.ctxFront = staging.getContext('2d');
+        this.ctxBack = canvas.getContext('2d');
+        this.ctxFront.lineWidth = 1;
+        this.ctxFront.strokeStyle = "rgba(20,20,20,0.1)";
+        this.ctxFront.globalCompositeOperation = "source-over";
+        this.ctxBack.lineWidth = 10;
+    },
+    dataToContext: function(ctx, data) {
+        ctx.beginPath();
+        ctx.moveTo(data[0].x, data[0].y);
         for (var i = 1; i < data.length; i++) {
-          context.lineTo(data[i].x, data[i].y);
+          ctx.lineTo(data[i].x, data[i].y);
         }
-        context.stroke();
-    },  
+        ctx.stroke();
+    },
 
     stroke: function () {
     
-      var context = staging.getContext('2d');
-      context.clearRect ( 0 , 0 , SCREEN_WIDTH , SCREEN_HEIGHT );
-      this.dataToContext(context, toolStrokeData);
-    
+        this.ctxFront.clearRect ( 0 , 0 , SCREEN_WIDTH , SCREEN_HEIGHT );
+        this.dataToContext(this.ctxFront, toolStrokeData);        
         
     },
     strokeEnd: function () {
@@ -30,10 +33,8 @@ pencil.prototype = {
             //transfer image from staging to canvas
       if ( toolStrokeData.length > 0) {
         toolTotalData.push(toolStrokeData);
-        var context = canvas.getContext('2d');
-        this.dataToContext(context, toolStrokeData);
-        var context = staging.getContext('2d');
-        context.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        this.dataToContext(this.ctxBack, toolStrokeData);
+        this.ctxFront.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       }
 
     

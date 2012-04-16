@@ -41,12 +41,7 @@ function init() {
   var m = document.createElement("div");
   m.id = "menu";
   document.body.appendChild(m);
-  //refactor to none jQuery ?
-  var t = $('<div id="tools"></div>');
-  t.append('brushes');
-  t.append('<canvas id="color_palette"></canvas>');
-  $('body').append(t);
-  
+   
  
 }
 
@@ -123,11 +118,25 @@ function onToolMove(e) {
 
 function jsCanvasPaint(brush_names){
 
+   var tool_list = $('<ul id="tool_list"></ul>');
+
    for(var i = 0; i < brush_names.length; i++){
-    tools[brush_names[i]] = eval('new ' + brush_names[i] + '()');
+     tools[brush_names[i]] = eval('new ' + brush_names[i] + '()');
+     tool_list.append('<li>'+brush_names[i]+'</li>');
    }
 
-  currentTool = tools['shaded'];
+  currentTool = tools[brush_names[0]];
+
+  var t = $('<div id="tools"></div>');
+  t.append(tool_list);
+  t.append('<canvas id="color_palette"></canvas>');
+  $('body').append(t);
+  $('ul#tool_list li').click(function(e){ 
+      currentTool = tools[$(this).text()]; 
+      menuUp = false;
+      $('#tools').hide();
+  });
+
   init(); 
 
   if (touchEnabled) {

@@ -24,7 +24,21 @@ width:300px;
 background-color:white;
 z-index:200;
 display:none;
+cursor:pointer;
 }
+body {
+   -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+
+   /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+   -ms-user-select: none;
+   user-select: none;
+}
+
 </style>
 <script src="jquery-1.7.1.min.js"></script>
 <script src="jsCanvasPaint.js"></script>
@@ -34,7 +48,7 @@ display:none;
 
 <script>
 window.onload = function(){
- jsCanvasPaint(['pencil','eraser','shaded']);
+ jsCanvasPaint(['pencil','shaded','eraser']);
 }
 </script>
 			

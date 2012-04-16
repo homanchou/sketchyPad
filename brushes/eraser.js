@@ -9,7 +9,7 @@ eraser.prototype = {
         this.context = canvas.getContext('2d');
         this.context.lineWidth = 30;
         this.context.strokeStyle = "rgba(255,255,255,0.7)";
-        this.context.globalCompositeOperation = "destination-out"
+        this.context.globalCompositeOperation = "destination-out";
     },
   
 
@@ -24,7 +24,7 @@ eraser.prototype = {
     },
     strokeEnd: function () {
     
-   
+        this.context.globalCompositionOperation = "source-over"; 
     
     }
 };

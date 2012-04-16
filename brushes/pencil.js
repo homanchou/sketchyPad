@@ -10,8 +10,11 @@ pencil.prototype = {
         this.ctxBack = canvas.getContext('2d');
         this.ctxFront.lineWidth = 1;
         this.ctxFront.strokeStyle = "rgba(20,20,20,0.1)";
+        this.ctxBack.strokeStyle = "rgba(20,20,20,0.1)";
         this.ctxFront.globalCompositeOperation = "source-over";
         this.ctxBack.lineWidth = 10;
+        this.ctxBack.globalCompositeOperation = "source-over";
+
     },
     dataToContext: function(ctx, data) {
         ctx.beginPath();

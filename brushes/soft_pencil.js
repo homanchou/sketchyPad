@@ -1,7 +1,7 @@
-function shaded() {
+function soft_pencil() {
     this.init();
 }
-shaded.prototype = {
+soft_pencil.prototype = {
     init: function () {},
     ctx: undefined,
     points: undefined,
@@ -23,7 +23,7 @@ shaded.prototype = {
     },*/
     drawAdditional: function() {
         var prevOpacity = this.ctx.strokeStyle;
-        this.ctx.strokeStyle = "rgba(20,20,20,0.05)";
+        this.ctx.strokeStyle = "rgba("+RGB.join(',')+",0.05)";
         this.ctx.lineWidth = 1;
 
         var prevPoint = this.points[0];

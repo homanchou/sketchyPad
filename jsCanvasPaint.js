@@ -9,11 +9,8 @@ var toolMaxX = 0;
 var toolMaxY = 0;
 var toolMinX = 2000;
 var toolMinY = 2000;
-var toolInUse = false;
-var menuUp = false;
 var tools = {};
 var currentTool;
-var colorPicking = false;
 
 
 
@@ -75,50 +72,24 @@ function processColorPicker(e) {
 }
 
 function onTouchStart(e){
+    //reject if right button click
+    if (e.which === 3) { return; }
+
     registerEventToTarget(container, {move:onTouchMove});
 
     menuClose();
 
-  epochOffset = (new Date()).getTime();
+    epochOffset = (new Date()).getTime();
 
-  updateXY(e);
-  time = 0;
+    updateXY(e);
+    time = 0;
   
-  currentTool.strokeStart();
-
-    /*
-  if (e.target.id == 'menu') {
-    $('#tools').show();
-    menuUp = true;
-  } else if ( e.target.id == 'staging') {
-    menuUp = false;
-    $('#tools').hide();
-  } else if (e.target.id == 'color_palette') {
-    processColorPicker(e);
-    return;
-  }
-  if (menuUp == true) { return; }
-  
-  toolInUse = true;
-  epochOffset = (new Date()).getTime();
-
-  updateXY(e);
-  time = 0;
-  
-  currentTool.strokeStart();*/
+    currentTool.strokeStart();
 }
 
 function onTouchEnd(e){
    currentTool.strokeEnd();
    deregisterEventToTarget(container, {move:onTouchMove});
- /*
-  if (toolInUse == false) { return; }
-
-  console.log('toolend');
-//  $('canvas').css('background-color','white');
-  toolInUse = false;
-  
-  currentTool.strokeEnd();*/
 
 }
 
@@ -133,26 +104,6 @@ function onTouchMove(e) {
     time = (new Date()).getTime() - epochOffset;
   
     currentTool.stroke();
-    /*
-    console.log('toolmove');
-    e.preventDefault(); //prevent overscroll
-    console.log(e);
-    if (e.target.id == "color_palette") {
-      processColorPicker(e);
-      return;
-    }
-    
-
-    if (toolInUse == false) { return; }
-
-    toolPrevX = toolX;
-    toolPrevY = toolY;
-    updateXY(e);
-
-    prevTime = time;
-    time = (new Date()).getTime() - epochOffset;
-  
-    currentTool.stroke();*/
 }
 
 function loadColorPaletteData() {

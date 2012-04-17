@@ -260,8 +260,8 @@ function exportImageData(type){
   m.width  = toolMaxX - toolMinX;
   m.height = toolMaxY - toolMinY;
   var mc = m.getContext('2d');
-  mc.drawImage(canvas.getContext('2d').canvas, toolMinX, toolMinY, toolMaxX, toolMaxY)
+  mc.drawImage(canvas,toolMinX, toolMinY, m.width,m.height,0,0, m.width, m.height);
+  
   return m.toDataURL("image/"+type).replace('data:image/'+type+';base64,', '');
-
 
 }

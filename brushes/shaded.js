@@ -8,7 +8,7 @@ shaded.prototype = {
     strokeStart: function() {
         this.ctx = canvas.getContext('2d');
         this.ctx.lineWidth = 3;
-        this.ctx.strokeStyle = "rgba(20,20,20,0.2)";
+        this.ctx.strokeStyle = "rgba("+RGB.join(',')+",0.2)";
         this.ctx.globalCompositeOperation = "source-over";
         this.points = [{x:toolX,y:toolY}];
     },

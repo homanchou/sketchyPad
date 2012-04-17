@@ -1,14 +1,16 @@
 function shaded() {
-    this.init()
+    this.init();
 }
 shaded.prototype = {
     init: function () {},
     ctx: undefined,
+    points: undefined,
     strokeStart: function() {
         this.ctx = canvas.getContext('2d');
-        this.ctx.lineWidth = 1;
+        this.ctx.lineWidth = 3;
         this.ctx.strokeStyle = "rgba(20,20,20,0.2)";
         this.ctx.globalCompositeOperation = "source-over";
+        this.points = [{x:toolX,y:toolY}];
     },
     /*
     dataToContext: function(ctx, data) {
@@ -22,51 +24,52 @@ shaded.prototype = {
     drawAdditional: function() {
         var prevOpacity = this.ctx.strokeStyle;
         this.ctx.strokeStyle = "rgba(20,20,20,0.05)";
-        var prevSlope = 0;
-        var final_angle = Math.atan2(toolPrevX - toolX, toolPrevY - toolY);
-   //     console.log("master point ("+toolX+","+toolY+") " + "final angle:" + final_angle);
-        var lookBack = 2 + Math.ceil(20 * toolSpeed/500);
-        for (var i = Math.max(0,toolStrokeData.length - lookBack); i < toolStrokeData.length - 1; i++) {
+        this.ctx.lineWidth = 1;
 
-            var deltaX = toolStrokeData[i].x - toolX;
-            var deltaY = toolStrokeData[i].y - toolY;
-            var sudoDistance = deltaX * deltaX + deltaY * deltaY;
-            var angle = Math.atan2(deltaX, deltaY);
-  //          console.log("sub point ("+ toolStrokeData[i].x+","+ toolStrokeData[i].y+") angle: " + angle);
-           // var slope = deltaY / deltaX;
-   //         console.log("x: " + deltaX + " y: " + deltaY );
-            angle_diff = Math.abs(final_angle - angle);
-        //    console.log(angle_diff);
-        //make more connections when drawing fast, make less connects when drawing slow
-            if (sudoDistance < 2000 && angle_diff < 0.9 ) {
-                this.ctx.beginPath();
-                var noise = 5 ;
-                if (deltaX == 0) {deltaX = noise};
-                if (deltaY == 0) {deltaY = noise};
-                this.ctx.moveTo(toolX + (deltaX * 0.3), toolY + (deltaY * 0.3));
-             //   this.ctx.moveTo(toolX , toolY);
-                this.ctx.lineTo(toolStrokeData[i].x - (deltaX * 0.3), toolStrokeData[i].y - (deltaY * 0.3));
-            //    this.ctx.lineTo(toolStrokeData[i].x , toolStrokeData[i].y );
-              
-                this.ctx.stroke()
-            }
+        var prevPoint = this.points[0];
+        this.ctx.beginPath();
+        for (var i = 1; i< this.points.length; i++) {
+          this.ctx.moveTo(prevPoint.x, prevPoint.y);
+          var thisPoint = {x:this.points[i].x + Math.floor(Math.random()*3) - Math.floor(Math.random()*3), y:this.points[i].y+Math.floor(Math.random()*3)-Math.floor(Math.random()*3)};
+          this.ctx.lineTo(thisPoint.x, thisPoint.y);
+          prevPoint = thisPoint;
         }
+
+        this.ctx.stroke();
         this.ctx.strokeStyle = prevOpacity;
+        this.ctx.lineWidth = 3;
+
 
 
     
     },
+    drawDot: function(){
+      for(var i=0;i<this.points.length;i++){
+       // this.ctx.fillStyle   = '#00f';
+        this.ctx.fillRect(this.points[i].x, this.points[i].y, 2, 2);
+      }
+
+    },
     stroke: function () {
     
         //this.ctxFront.clearRect ( 0 , 0 , SCREEN_WIDTH , SCREEN_HEIGHT );
-      
         this.ctx.beginPath();
         this.ctx.moveTo(toolPrevX, toolPrevY);
         this.ctx.lineTo(toolX, toolY);
         this.ctx.stroke();
+/*
+        this.ctx.beginPath();
+        this.ctx.moveTo(toolPrevX + Math.random()*5, toolPrevY + Math.random()*5);
+        this.ctx.lineTo(toolX + Math.random()*5, toolY + Math.random()*5);
+        this.ctx.stroke();
+*/
+        this.points.push({x:toolX,y:toolY});
+        if (this.points.length > 6) {
+          this.points.shift(); //keep array small, need only consider last couple of points
+        }
+     //   this.drawDot();
         this.drawAdditional();
-
-   //     this.dataToContext(this.ctxFront, toolStrokeData);        
+        this.drawAdditional();
         
     },
     strokeEnd: function () {
@@ -77,7 +80,6 @@ shaded.prototype = {
         this.dataToContext(this.ctxBack, toolStrokeData);
         this.ctxFront.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
       }*/
-
     
     }
 };

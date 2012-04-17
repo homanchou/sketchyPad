@@ -2,10 +2,8 @@ const REV=1;
 var SCREEN_WIDTH=window.innerWidth;
 var container, canvas;
 var SCREEN_HEIGHT=window.innerHeight;
-var toolX, toolY, toolSpeed, toolPrevX, toolPrevY, time, prevTime;
+var toolX, toolY, toolPrevX, toolPrevY, time, prevTime, epochOffset;
 var touchEnabled = ('ontouchstart' in window);
-var toolTotalData = []; //save each stroke
-var toolStrokeData;
 var toolMaxX = 0;
 var toolMaxY = 0;
 var toolMinX = 2000;
@@ -16,12 +14,6 @@ var tools = {};
 var currentTool;
 
 
-function playBack(SketchData) {
-  for(var i=0; i < SketchData.length; i++) {
-    dataToCanvas(SketchData[i]);
-  }
-
-}
 
 function addFullScreenCanvas(id) {
   var canvas = document.createElement("canvas");
@@ -54,7 +46,6 @@ function updateXY(e){
     toolY = e.clientY;
   }
   
-  time = (new Date()).getTime();
   toolMaxX = Math.max(toolMaxX, toolX);
   toolMaxY = Math.max(toolMaxY, toolY);
   toolMinX = Math.min(toolMinX, toolX);
@@ -72,8 +63,10 @@ function onToolStart(e){
   if (menuUp == true) { return; }
   
   toolInUse = true;
+  epochOffset = (new Date()).getTime();
+
   updateXY(e);
-  toolStrokeData = [{x:toolX,y:toolY,speed:0}];
+  time = 0;
   
   currentTool.strokeStart();
 }
@@ -89,7 +82,6 @@ function onToolEnd(e){
 
 }
 
-//calculates tool speed
 
 function onToolMove(e) {
     console.log('toolmove');
@@ -98,43 +90,37 @@ function onToolMove(e) {
 
     toolPrevX = toolX;
     toolPrevY = toolY;
-    prevTime = time;
-
     updateXY(e);
-        
-    var deltaX = Math.abs(toolX - toolPrevX);
-    var deltaY = Math.abs(toolY - toolPrevY);
-    var deltaTime = time - prevTime;
-    var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    toolSpeed = Math.ceil(1000 * distance / deltaTime);
-//    console.log("x: " + toolX + ", y: " + toolY + " deltaX: " + deltaX + " deltaY: " + deltaY + " deltaTime: " + deltaTime +
-//      " distance: " + distance + " speed: " + toolSpeed);
+
+    prevTime = time;
+    time = (new Date()).getTime() - epochOffset;
   
-    toolStrokeData.push({x:toolX,y:toolY,speed:toolSpeed});
     currentTool.stroke();
 }
 
 
 
-function jsCanvasPaint(brush_names){
+function jsCanvasPaint(tool_names){
 
-   var tool_list = $('<ul id="tool_list"></ul>');
+   var tool_list = $('<select id="tool_list"></select>');
 
-   for(var i = 0; i < brush_names.length; i++){
-     tools[brush_names[i]] = eval('new ' + brush_names[i] + '()');
-     tool_list.append('<li>'+brush_names[i]+'</li>');
+   for(var i = 0; i < tool_names.length; i++){
+     tools[tool_names[i]] = eval('new ' + tool_names[i] + '()');
+     tool_list.append('<option>'+tool_names[i]+'</option>');
    }
 
-  currentTool = tools[brush_names[0]];
+  currentTool = tools[tool_names[0]];
 
   var t = $('<div id="tools"></div>');
   t.append(tool_list);
   t.append('<canvas id="color_palette"></canvas>');
   $('body').append(t);
-  $('ul#tool_list li').click(function(e){ 
-      currentTool = tools[$(this).text()]; 
-      menuUp = false;
-      $('#tools').hide();
+  $('#tool_list').change(function(e){ 
+      var tool_name = $("select option:selected").text();
+
+      currentTool = tools[tool_name]; 
+      //menuUp = false;
+      //$('#tools').hide();
   });
 
   init(); 

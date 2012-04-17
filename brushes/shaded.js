@@ -6,7 +6,7 @@ shaded.prototype = {
     ctx: undefined,
     strokeStart: function() {
         this.ctx = canvas.getContext('2d');
-        this.ctx.lineWidth = 1;
+        this.ctx.lineWidth = 8;
         this.ctx.strokeStyle = "rgba(20,20,20,0.2)";
         this.ctx.globalCompositeOperation = "source-over";
     },
@@ -20,25 +20,21 @@ shaded.prototype = {
         ctx.stroke();
     },*/
     drawAdditional: function() {
+                this.ctx.lineWidth = 1;
+
         var prevOpacity = this.ctx.strokeStyle;
         this.ctx.strokeStyle = "rgba(20,20,20,0.05)";
         var prevSlope = 0;
         var final_angle = Math.atan2(toolPrevX - toolX, toolPrevY - toolY);
-   //     console.log("master point ("+toolX+","+toolY+") " + "final angle:" + final_angle);
-        var lookBack = 2 + Math.ceil(20 * toolSpeed/500);
-        for (var i = Math.max(0,toolStrokeData.length - lookBack); i < toolStrokeData.length - 1; i++) {
+
+        for (var i = 0; i < toolStrokeData.length - 1; i++) {
 
             var deltaX = toolStrokeData[i].x - toolX;
             var deltaY = toolStrokeData[i].y - toolY;
-            var sudoDistance = deltaX * deltaX + deltaY * deltaY;
-            var angle = Math.atan2(deltaX, deltaY);
-  //          console.log("sub point ("+ toolStrokeData[i].x+","+ toolStrokeData[i].y+") angle: " + angle);
-           // var slope = deltaY / deltaX;
-   //         console.log("x: " + deltaX + " y: " + deltaY );
-            angle_diff = Math.abs(final_angle - angle);
-        //    console.log(angle_diff);
-        //make more connections when drawing fast, make less connects when drawing slow
-            if (sudoDistance < 2000 && angle_diff < 0.9 ) {
+            var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+          //  var angle = Math.atan2(deltaX, deltaY);
+          //  angle_diff = Math.abs(final_angle - angle);
+            if (distance < 50 ) {
                 this.ctx.beginPath();
                 var noise = 5 ;
                 if (deltaX == 0) {deltaX = noise};
@@ -53,6 +49,7 @@ shaded.prototype = {
         }
         this.ctx.strokeStyle = prevOpacity;
 
+        this.ctx.lineWidth = 8;
 
     
     },

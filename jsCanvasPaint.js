@@ -2,7 +2,7 @@ const REV=1;
 var SCREEN_WIDTH=window.innerWidth;
 var container, canvas;
 var SCREEN_HEIGHT=window.innerHeight;
-var toolX, toolY, toolSpeed, toolPrevX, toolPrevY, time, prevTime;
+var toolX, toolY, toolPrevX, toolPrevY, toolStartEpoch, toolTime;
 var touchEnabled = ('ontouchstart' in window);
 var toolTotalData = []; //save each stroke
 var toolStrokeData;
@@ -59,11 +59,12 @@ function updateXY(e){
     toolY = e.clientY;
   }
   
-  time = (new Date()).getTime();
+
   toolMaxX = Math.max(toolMaxX, toolX);
   toolMaxY = Math.max(toolMaxY, toolY);
   toolMinX = Math.min(toolMinX, toolX);
   toolMinY = Math.min(toolMinY, toolY);
+
 }
 
 function onToolStart(e){
@@ -77,8 +78,12 @@ function onToolStart(e){
   if (menuUp == true) { return; }
   
   toolInUse = true;
+  toolStartEpoch = (new Date()).getTime();
+  toolTime = 0;
+
   updateXY(e);
-  toolStrokeData = [{x:toolX,y:toolY,speed:0}];
+
+  toolStrokeData = [{x:toolX,y:toolY,t:0}];
   
   currentTool.strokeStart();
 }
@@ -103,19 +108,11 @@ function onToolMove(e) {
 
     toolPrevX = toolX;
     toolPrevY = toolY;
-    prevTime = time;
-
     updateXY(e);
         
-    var deltaX = Math.abs(toolX - toolPrevX);
-    var deltaY = Math.abs(toolY - toolPrevY);
-    var deltaTime = time - prevTime;
-    var distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-    toolSpeed = Math.ceil(1000 * distance / deltaTime);
-//    console.log("x: " + toolX + ", y: " + toolY + " deltaX: " + deltaX + " deltaY: " + deltaY + " deltaTime: " + deltaTime +
-//      " distance: " + distance + " speed: " + toolSpeed);
-  
-    toolStrokeData.push({x:toolX,y:toolY,speed:toolSpeed});
+    toolTime = (new Date()).getTime() - toolStartEpoch;
+   
+    toolStrokeData.push({x:toolX,y:toolY,t:toolTime});
     currentTool.stroke();
 }
 

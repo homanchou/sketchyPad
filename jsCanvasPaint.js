@@ -254,3 +254,14 @@ function colorPickEnd(e) {
    deregisterEventToTarget(color_palette, {move:colorPickMove});  
 }
 
+function exportImageData(type){
+  if (!type) {type='png';}
+  var m = document.createElement('canvas');
+  m.width  = toolMaxX - toolMinX;
+  m.height = toolMaxY - toolMinY;
+  var mc = m.getContext('2d');
+  mc.drawImage(canvas.getContext('2d').canvas, toolMinX, toolMinY, toolMaxX, toolMaxY)
+  return m.toDataURL("image/"+type).replace('data:image/'+type+';base64,', '');
+
+
+}

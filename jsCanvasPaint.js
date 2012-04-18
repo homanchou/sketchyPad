@@ -3,6 +3,7 @@ var SCREEN_WIDTH=window.innerWidth;
 var SCREEN_HEIGHT=window.innerHeight;
 var RGB=[20,20,20];
 var container, canvas, staging, color_palette, color_palette_canvas, color_palette_ctx;
+var bg_img; //used for saving bg image into final export
 var toolX, toolY, toolPrevX, toolPrevY, time, prevTime, epochOffset;
 var touchEnabled = ('ontouchstart' in window);
 var toolMaxX = 0;
@@ -33,10 +34,10 @@ function updateXY(e){
     toolY = e.clientY;
   }
  
-  toolMaxX = Math.max(toolMaxX, toolX);
-  toolMaxY = Math.max(toolMaxY, toolY);
-  toolMinX = Math.min(toolMinX, toolX);
-  toolMinY = Math.min(toolMinY, toolY);
+  toolMaxX = Math.max(toolMaxX, Math.min(toolX+50, SCREEN_WIDTH));
+  toolMaxY = Math.max(toolMaxY, Math.min(toolY+50, SCREEN_HEIGHT));
+  toolMinX = Math.min(toolMinX, Math.max(toolX-50, 0));
+  toolMinY = Math.min(toolMinY, Math.max(toolY-50, 0));
 }
 function relativeCoordinate(e) {
   
@@ -113,6 +114,12 @@ function loadColorPaletteData() {
   
   var url = $('#color_palette').css('background-image');
   img.src = url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+
+  bg_img = document.createElement('img');
+  url = $('body').css('background-image');
+
+  bg_img.src = url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+
 
 // Copy image (img) to canvas
   img.onload = function() {
@@ -260,8 +267,10 @@ function exportImageData(type){
   m.width  = toolMaxX - toolMinX;
   m.height = toolMaxY - toolMinY;
   var mc = m.getContext('2d');
+  mc.drawImage(bg_img,toolMinX, toolMinY, m.width, m.height,0,0,m.width, m.height);
   mc.drawImage(canvas,toolMinX, toolMinY, m.width,m.height,0,0, m.width, m.height);
   
   return m.toDataURL("image/"+type).replace('data:image/'+type+';base64,', '');
 
 }
+

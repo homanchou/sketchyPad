@@ -163,6 +163,17 @@
       return ctx.clearRect(0, 0, width, height);
     };
 
+    Renderer.drawDot = function(ctx, point) {
+      var x, y;
+      x = point[0];
+      y = point[1];
+      ctx.globalCompositeOperation = "source-over";
+      ctx.beginPath();
+      ctx.arc(x, y, size / 2, 0, Math.PI * 2, true);
+      ctx.fillStyle = color;
+      return ctx.fill();
+    };
+
     Renderer.drawStroke = function(ctx, stroke) {
       var color, index, point, points, size, x, xc, y, yc, _i, _j, _len, _len1, _ref, _ref1;
       color = stroke[0];
@@ -310,15 +321,6 @@
     };
 
     SketchyPad.prototype.show_tool_size = function() {
-      if (this.selected_tool) {
-        this.$canvas.addClass('brush');
-        this.$canvas.removeClass('eraser');
-      } else {
-        this.$canvas.addClass('eraser');
-        this.$canvas.removeClass('brush');
-      }
-      Renderer.clear(this.feedback_ctx, this.width, this.height);
-      Renderer.applyStrokes(this.feedback_ctx, this.sketchData);
       return Renderer.drawStroke(this.feedback_ctx, [this.selected_tool, this.tool_size, [[this.sketch_listener.mouseCoord.x, this.sketch_listener.mouseCoord.y, null]]]);
     };
 
@@ -326,16 +328,12 @@
       this.redoData = [];
       this.startTime = new Date().getTime();
       this.strokeData.push([this.sketch_listener.mouseCoord.x, this.sketch_listener.mouseCoord.y, 0]);
-      Renderer.clear(this.feedback_ctx, this.width, this.height);
-      Renderer.applyStrokes(this.feedback_ctx, this.sketchData);
       return Renderer.drawStroke(this.feedback_ctx, [this.selected_tool, this.tool_size, this.strokeData]);
     };
 
     SketchyPad.prototype.process_mouse_move = function() {
       this.elapsed_time = (new Date().getTime()) - this.startTime;
       this.strokeData.push([this.sketch_listener.mouseCoord.x, this.sketch_listener.mouseCoord.y, this.elapsed_time]);
-      Renderer.clear(this.feedback_ctx, this.width, this.height);
-      Renderer.applyStrokes(this.feedback_ctx, this.sketchData);
       return Renderer.drawStroke(this.feedback_ctx, [this.selected_tool, this.tool_size, this.strokeData]);
     };
 
@@ -359,5 +357,61 @@
   })();
 
   root.SketchyPad = SketchyPad;
+
+  (function($, window, document) {
+    var $this, methods, _anotherState, _flag, _internals, _listening_layer, _settings;
+    $this = void 0;
+    _settings = {
+      "default": 'cool!'
+    };
+    _flag = false;
+    _anotherState = null;
+    _listening_layer = null;
+    methods = {
+      init: function(options) {
+        var opts;
+        $this = $(this);
+        console.log($this.width());
+        opts = {
+          width: $this.width(),
+          height: $this.height()
+        };
+        _listening_layer = new SketchyPad(opts);
+        $this.append(_listening_layer.$canvas);
+        _listening_layer.captureStart();
+        $.extend(_settings, options || {});
+        return $this;
+      },
+      doSomething: function(what) {
+        return $this;
+      },
+      destroy: function() {
+        console.log('calling destroy');
+        _listening_layer.captureStop();
+        _listening_layer.$canvas.remove();
+        return $this;
+      }
+    };
+    _internals = {
+      toggleFlag: function() {
+        return _flag = !_flag;
+      },
+      computeSomething: function(state, flag) {
+        return flag != null ? flag : {
+          state: "No, that's not right."
+        };
+      }
+    };
+    return $.fn.sketchyPad = function(method) {
+      console.log(method);
+      if (methods[method]) {
+        return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
+      } else if (typeof method === "object" || !method) {
+        return methods.init.apply(this, arguments);
+      } else {
+        return $.error("Method " + method + " does not exist on jquery.sketchyPad");
+      }
+    };
+  })(jQuery, window, document);
 
 }).call(this);

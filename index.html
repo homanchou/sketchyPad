@@ -4,22 +4,26 @@
     <script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js"></script>
     <script src="sketchyPad.js"></script>
     <style>
-    canvas {
+    .sketchable_area {
       border:1px solid red;
       background-color: gray;
+      width:600px;
+      height:600px;
     }
   </style>
   <script>
     $(function(){
-          var opts = {width:600, height:600}
-      var s = new SketchyPad(opts);
-      $('body').append(s.$canvas);
-      s.captureStart();
+
+      $('.sketchable_area').sketchyPad();
+      // $('.sketchable_area').sketchyPad('destroy');
     });
 
   </script>
   </head>
 <body>
+
+  <div class="sketchable_area">
+  </div>
 
 
 

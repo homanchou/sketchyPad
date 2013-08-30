@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+  <head> 
+    <script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="sketchyPad.js"></script>
+    <style>
+    canvas {
+      border:1px solid red;
+      background-color: gray;
+    }
+  </style>
+  <script>
+    $(function(){
+          var opts = {width:600, height:600}
+      var s = new SketchyPad(opts);
+      $('body').append(s.$canvas);
+      s.captureStart();
+    });
+
+  </script>
+  </head>
+<body>
+
+
+
+ 
+
+
+</body>
+</html>

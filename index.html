@@ -2,28 +2,51 @@
 <html>
   <head> 
     <script src="http://codeorigin.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="smooth.js"></script>
     <script src="sketchyPad.js"></script>
+
+    
     <style>
     .sketchable_area {
       border:1px solid red;
-      background-color: gray;
-      width:600px;
-      height:600px;
+      width:550px;
+      height:550px;
     }
+    .sketchable_area canvas {
+      position:absolute;
+      cursor:crosshair;
+    }
+    body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: -moz-none;
+    -ms-user-select: none;
+    user-select: none;
+    }
+
   </style>
   <script>
     $(function(){
 
       $('.sketchable_area').sketchyPad();
       // $('.sketchable_area').sketchyPad('destroy');
+
+
     });
+
 
   </script>
   </head>
 <body>
 
   <div class="sketchable_area">
+    <img src="cat_woman.jpg" />
   </div>
+
+
+
+
 
 
 

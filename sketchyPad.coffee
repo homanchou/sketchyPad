@@ -15,14 +15,10 @@ class SketchData
 class SketchStroke
   constructor: () ->
     @color = 'rgba(255,0,0,0.5)'
-    @points = []
-    @pressures = []
-    @timestamps = []
+    @data_points = []
 
-  addData: (point, pressure) ->
-    @points.push point
-    @pressures.push pressure
-    @timestamps.push Time.now
+  add: (x,y,pressure) ->
+    @data_points.push [x,y,pressure,new Date().getTime()]
 
 #############################################################################
 #View class responsible for rendering lines
@@ -35,10 +31,15 @@ class SketchView
     @height = @$canvas.height()
     @ctx = @$canvas[0].getContext('2d')
     @ctx.globalCompositeOperation = "source-over"
-  drawStroke: (stroke) ->
+  drawStroke: (stroke) -> 
+    console.log('draw stroke', stroke)
   drawStrokes: (strokes) ->
+    for stroke in strokes
+      @drawStroke(stroke)
   playbackStrokes: (strokes) ->
+    console.log('playback strokes')
   clear: ()->
+    @ctx.clearRect(0, 0, @width, @height)
 
 
 ##################################################################################### 
@@ -49,7 +50,13 @@ class SketchView
 
 class SketchListener
   constructor: (element) ->
+    #add wacom plugin so we can get pen pressure
+    @$wacom_object = $('<object>',{id:'wtPlugin',type:'application/x-wacomtabletplugin'})
+    @$wacom_object.append($('<param>',{name:'onload',value:'pluginLoaded'}))
+    $('body').append(@$wacom_object)
+
     @$element = element;
+    console.log('sketch listening getting element', @$element)
     
     #these are events that external parties can 'listen to'
     #use addCallback, using one of these eventNames, and a function to call
@@ -85,6 +92,7 @@ class SketchListener
 
   onCanvasMouseHover: (event) =>
     #this is what happens when you are hovering your mouse
+
     @getMouseCoord(event)
     for callback in @callbacks['onCanvasMouseHover']
       callback.call()
@@ -102,8 +110,8 @@ class SketchListener
     $(document).bind( @mouseMoveEvent, @onCanvasMouseMove )
     $(document).bind( @mouseUpEvent, @onCanvasMouseUp )
 
-
   getMouseCoord: (event) =>
+    console.log('getting mouse coor')
     #find the mouse coord relative to the canvas, regardless of scrolling
     if (@touchSupported)
       target = event.originalEvent.touches[0]
@@ -111,9 +119,8 @@ class SketchListener
       target = event
     
     offset = @$element.offset();
-    @mouseCoord.x = Math.round(target.pageX - offset.left);
-    @mouseCoord.y = Math.round(target.pageY - offset.top);
-    # Renderer.drawDot(@$element[0].getContext('2d'),[@mouseCoord.x,@mouseCoord.y])
+    @mouseCoord[0] = Math.round(target.pageX - offset.left)
+    @mouseCoord[1] = Math.round(target.pageY - offset.top)
 
   onCanvasMouseMove: (event) =>
     @getMouseCoord( event )
@@ -126,10 +133,14 @@ class SketchListener
   onCanvasMouseUp: (event) => 
     for callback in @callbacks['onCanvasMouseUp']
       callback.call()
-    #drawing as stopped, switch out draw listening for hover listening
+    #switch out draw listening for hover listening
     $(document).unbind( @mouseMoveEvent, @onCanvasMouseMove )
     $(document).unbind( @mouseUpEvent, @onCanvasMouseUp )
     @$element.bind(@mouseMoveEvent, @onCanvasMouseHover) unless @touchSupported
+
+  getPressure: =>
+    return document.getElementById('wtPlugin').penAPI.pressure
+
 
 
 
@@ -138,53 +149,52 @@ class SketchListener
 
 # #this class is responsible for actually drawing lines
 # TODO - refactor this
-class Renderer
-  this.apply = (layer, instruction) ->
-    context = layer[0].getContext('2d')
-  this.clear = (ctx, width, height) ->
-    ctx.clearRect( 0 , 0 , width, height)
-  this.drawDot = (ctx, point) ->
-    x = point[0]
-    y = point[1]
-    pressure = point[2]
-    ctx.globalCompositeOperation = "source-over"
-    ctx.beginPath()
-    ctx.arc(x, y, 1, 0, Math.PI * 2, true);
-    ctx.fillStyle='rgba(255,0,0,0.5)'
-    ctx.fill()
-  this.drawStroke = (ctx, stroke) ->
-    #size and color don't change
-    color = stroke[0]
-    size = stroke[1]
-    points = stroke[2]
-    if color == null
-      ctx.globalCompositeOperation = "destination-out" 
-      color = 'rgba(255,255,255,1)'
-    else
-      ctx.globalCompositeOperation = "source-over"
+# class Renderer
+  
+#   this.clear = (ctx, width, height) ->
+#     ctx.clearRect( 0 , 0 , width, height)
+#   this.drawDot = (ctx, point) ->
+#     x = point[0]
+#     y = point[1]
+#     pressure = point[2]
+#     ctx.globalCompositeOperation = "source-over"
+#     ctx.beginPath()
+#     ctx.arc(x, y, 1, 0, Math.PI * 2, true);
+#     ctx.fillStyle='rgba(255,0,0,0.5)'
+#     ctx.fill()
+#   this.drawStroke = (ctx, stroke) ->
+#     #size and color don't change
+#     color = stroke[0]
+#     size = stroke[1]
+#     points = stroke[2]
+#     if color == null
+#       ctx.globalCompositeOperation = "destination-out" 
+#       color = 'rgba(255,255,255,1)'
+#     else
+#       ctx.globalCompositeOperation = "source-over"
 
-    if points.length >= 2 #Draw curve if there are at least two points
-        #Clear path and move to the start point
-        ctx.beginPath()
-        ctx.moveTo points[0]...
+#     if points.length >= 2 #Draw curve if there are at least two points
+#         #Clear path and move to the start point
+#         ctx.beginPath()
+#         ctx.moveTo points[0]...
 
-        #Last index to draw is the last index of the array...
-        lastIndex = points.length - 1
+#         #Last index to draw is the last index of the array...
+#         lastIndex = points.length - 1
 
-        #...unless the clip is periodic, in which case we connect back to the start
-        lastIndex++ if smoothConfig.clip is 'periodic'
+#         #...unless the clip is periodic, in which case we connect back to the start
+#         lastIndex++ if smoothConfig.clip is 'periodic'
 
-        #Add all of the curve segments
-        addCurveSegment cx, i, points for i in [0...lastIndex]
+#         #Add all of the curve segments
+#         addCurveSegment cx, i, points for i in [0...lastIndex]
 
-        #Set drawing style
-        cx.lineWidth = 2
-        cx.strokeStyle = '#0000ff'
-        cx.lineJoin = 'round'
-        cx.lineCap = 'round'
+#         #Set drawing style
+#         cx.lineWidth = 2
+#         cx.strokeStyle = '#0000ff'
+#         cx.lineJoin = 'round'
+#         cx.lineCap = 'round'
 
-        #Draw the path
-        cx.stroke()
+#         #Draw the path
+#         cx.stroke()
 
 
 
@@ -230,185 +240,149 @@ class Renderer
     #   #curve through last two points
     #   ctx.quadraticCurveTo(points[index-1][0],points[index-1][1], points[index][0], points[index][1])
     #   ctx.stroke()
-    return
-  this.applyStrokes = (ctx, strokes) ->
-    for stroke in strokes
-      this.drawStroke(ctx, stroke)
-    return
-  this.playStrokes = (onion_skin, $transport, strokes, stroke_index=0, point_index=0, timer=null, callback) ->
-    ctx = onion_skin.feedback_ctx
-    width = onion_skin.width
-    height = onion_skin.height
+  #   return
+  # this.applyStrokes = (ctx, strokes) ->
+  #   for stroke in strokes
+  #     this.drawStroke(ctx, stroke)
+  #   return
+  # this.playStrokes = (onion_skin, $transport, strokes, stroke_index=0, point_index=0, timer=null, callback) ->
+  #   ctx = onion_skin.feedback_ctx
+  #   width = onion_skin.width
+  #   height = onion_skin.height
 
-    window.clearInterval(timer) if timer
-    # #splice into the stroke and draw the beginning strokes and points
-    #deep clone an object so we don't screw up the source
-    draw_to = JSON.parse(JSON.stringify(strokes))
-    draw_to = draw_to[0..stroke_index]
-    # the last stroke's last point should be truncated to current point index
-    draw_to[draw_to.length-1][2] = draw_to[draw_to.length - 1][2][0..point_index]
-    # #draw the sucker
-    this.clear(ctx, width, height)
-    this.applyStrokes(ctx, draw_to)
+  #   window.clearInterval(timer) if timer
+  #   # #splice into the stroke and draw the beginning strokes and points
+  #   #deep clone an object so we don't screw up the source
+  #   draw_to = JSON.parse(JSON.stringify(strokes))
+  #   draw_to = draw_to[0..stroke_index]
+  #   # the last stroke's last point should be truncated to current point index
+  #   draw_to[draw_to.length-1][2] = draw_to[draw_to.length - 1][2][0..point_index]
+  #   # #draw the sucker
+  #   this.clear(ctx, width, height)
+  #   this.applyStrokes(ctx, draw_to)
 
-    # #is there more to draw?
-    if point_index < strokes[stroke_index][2].length - 1
-      next_point_index = point_index + 1
-      next_stroke_index = stroke_index
-      delay = strokes[next_stroke_index][2][next_point_index][2] - strokes[stroke_index][2][point_index][2]
-    else if stroke_index < strokes.length - 1
-      next_stroke_index = stroke_index + 1
-      next_point_index = 0
-      delay = 200 #time between strokes is not recorded
-    else
-      callback.call()
-      return
+  #   # #is there more to draw?
+  #   if point_index < strokes[stroke_index][2].length - 1
+  #     next_point_index = point_index + 1
+  #     next_stroke_index = stroke_index
+  #     delay = strokes[next_stroke_index][2][next_point_index][2] - strokes[stroke_index][2][point_index][2]
+  #   else if stroke_index < strokes.length - 1
+  #     next_stroke_index = stroke_index + 1
+  #     next_point_index = 0
+  #     delay = 200 #time between strokes is not recorded
+  #   else
+  #     callback.call()
+  #     return
 
-    #return if interrupt 
-    if $transport.hasClass('playing')
-      #set a recursive with delay, pass a reference to this interval timer so it can be deleted
-      new_timer = window.setInterval( =>
-        this.playStrokes(onion_skin, $transport, strokes, next_stroke_index, next_point_index, new_timer, callback)
-      ,delay)
-      return
-    else
-      this.clear(ctx, width, height)
-      this.applyStrokes(ctx, strokes)
-      callback.call()
-      return
-
-
+  #   #return if interrupt 
+  #   if $transport.hasClass('playing')
+  #     #set a recursive with delay, pass a reference to this interval timer so it can be deleted
+  #     new_timer = window.setInterval( =>
+  #       this.playStrokes(onion_skin, $transport, strokes, next_stroke_index, next_point_index, new_timer, callback)
+  #     ,delay)
+  #     return
+  #   else
+  #     this.clear(ctx, width, height)
+  #     this.applyStrokes(ctx, strokes)
+  #     callback.call()
+  #     return
 
 
 
 
 
-#this class is the controller
-#creates a listener, and storage facility to hold the points
-#and calls Rendering
 
-class SketchyPad
+##################################################################################### 
+# SketchController creates the sketch canvases
+# it receives the messages that occur during drawing
+# updates the Sketch data models
+# updates the View models to render the drawing
 
-  
-  
+class SketchController
 
-  constructor: (opts) ->
+  constructor: (element) ->
+    #this is the element we want to create a drawable area out of
+    @$element = element
+    @width = @$element.width()
+    @height = @$element.height()
+
+    #create a fg and bg canvas
+    @$fg_view = new SketchView({id:'sketch_pad_fg',width:@width,height:@height})
+    @$bg_view = new SketchView({id:'sketch_page_bg',width:@width,height:@height})
     
-    #add wacom plugin to let us get pen pressure information
-    @$wacom_object = $('<object>',{id:'wtPlugin',type:'application/x-wacomtabletplugin'})
-    @$wacom_object.append($('<param>',{name:'onload',value:'pluginLoaded'}))
-    $('body').append(@$wacom_object)
-
-    #create a listening layer to listen for pen drawing and also redraw current stoke in realtime
-    @sketch_listener = new SketchListener(opts)
-    @$fg_canvas = @sketch_listener.$canvas
-
-    #register some methods to respond to the @sketch_listener events
-    @sketch_listener.addCallback('onCanvasMouseUp', @process_mouse_up)
-    @sketch_listener.addCallback('onCanvasMouseMove', @process_mouse_move)
-    @sketch_listener.addCallback('onCanvasMouseDown', @process_mouse_down)
-    @sketch_listener.addCallback('onCanvasMouseHover', @show_tool_size)
-    @sketch_listener.addCallback('onCanvasMouseOut', @refresh)
-
-    #create a background canvas to cache the strokes in image form
-    #when pen is lifted, the data from @sketchlistener's canvas will be copied here
-    @$bg_canvas = $('<canvas>',opts).attr('width',opts['width']).attr('height',opts['height']);
-
-    # @$canvas = @sketch_listener.$canvas
-    # @feedback_ctx = @$canvas[0].getContext('2d')
-    # @feedback_ctx.lineCap = 'round'
-
-   
-
-    # @width = @sketch_listener.width
-    # @height = @sketch_listener.height
+    #insert into the DOM at the element
+    @$element.prepend(@$fg_view.$canvas)
+    @$element.prepend(@$bg_view.$canvas)
     
-    # @feedback_canvas = @$canvas = $('<canvas>',opts).attr('width',opts['width']).attr('height',opts['height']);
+    #add listening on the fg canvas
+    @listener = new SketchListener(@$fg_view.$canvas)
 
-    # #create undo/redo object
-    # # @undo_redo = new UndoRedo(@image)
-    # #bind self as a callback 
-    # @strokeData = []
-    # @sketchData = []
-    # @redoData = [] #holding area for undos
-    # @selected_tool = '#ff0000' #color for brush, null for eraser
-    # @tool_size = 1
+    #register some methods to respond to the events
+    @listener.addCallback('onCanvasMouseUp', @process_mouse_up)
+    @listener.addCallback('onCanvasMouseMove', @process_mouse_move)
+    @listener.addCallback('onCanvasMouseDown', @process_mouse_down)
+    # @listener.addCallback('onCanvasMouseHover', @process_mouse_hover)
+    # @listener.addCallback('onCanvasMouseOut', @process_mouse_out)
 
-    
+    #create some data structure
+    #data for the whole drawing
+    @sketchData = new SketchData()
+    #data for just this line
+    @strokeData = new SketchStroke()
 
-
-  getPressure: =>
-    return document.getElementById('wtPlugin').penAPI.pressure
-
-
-  captureStart: =>
-      @sketch_listener.start()
-
-  captureStop: =>
-    @sketch_listener.stop()
+    #start listening
+    @listener.start()
 
   
 
-  show_tool_size: =>
-    # if @selected_tool
-    #   @$canvas.addClass('brush')
-    #   @$canvas.removeClass('eraser')
-    # else
-    #   @$canvas.addClass('eraser')
-    #   @$canvas.removeClass('brush')
-    
-    Renderer.clear(@feedback_ctx, @width, @height)
-    Renderer.applyStrokes(@feedback_ctx, @sketchData)
-    # Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, [[@sketch_listener.mouseCoord.x, @sketch_listener.mouseCoord.y, null]]])
-
-    
+     
      
   process_mouse_down: =>
-    @redoData = []
-    @startTime = new Date().getTime() 
-    @strokeData.push([@sketch_listener.mouseCoord.x, @sketch_listener.mouseCoord.y, @getPressure(), 0])
-    Renderer.clear(@feedback_ctx, @width, @height)
-    Renderer.applyStrokes(@feedback_ctx, @sketchData)
-    Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
+    console.log('mouse down')
+    @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[0], @listener.getPressure())
+    #Renderer.clear(@feedback_ctx, @width, @height)
+    #Renderer.applyStrokes(@feedback_ctx, @sketchData)
+    #Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
 
 
 
   process_mouse_move: =>
-    console.log(@getPressure())
-    #for animating playback use
-    @elapsed_time = (new Date().getTime()) - @startTime
+    @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[0], @listener.getPressure())
 
-    @strokeData.push([@sketch_listener.mouseCoord.x, @sketch_listener.mouseCoord.y, @getPressure(), @elapsed_time])
-    Renderer.clear(@feedback_ctx, @width, @height)
-    Renderer.applyStrokes(@feedback_ctx, @sketchData)
-    Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
-
+    # @strokeData.push([@sketch_listener.mouseCoord.x, @sketch_listener.mouseCoord.y, @getPressure(), @elapsed_time])
+    # Renderer.clear(@feedback_ctx, @width, @height)
+    # Renderer.applyStrokes(@feedback_ctx, @sketchData)
+    # Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
+    console.log('sketchstroke', @strokeData)
 
   process_mouse_up:  =>
-    #save this brush information in the play back archive
-    #tool - brush or eraser, size of the tool, raw_stroke_data
-    @sketchData.push([@selected_tool, @tool_size, @strokeData])
-    @strokeData = []
-    Renderer.applyStrokes(@feedback_ctx, @sketchData)
+    @sketchData.addStroke(@strokeData)
+    @strokeData = new SketchStroke()
+    console.log('sketch Data', @sketchData)
+    # Renderer.applyStrokes(@feedback_ctx, @sketchData)
     # @undo_redo.create_undo_state(['b#ff0000',3,raw_stroke_data])
 
 
-  refresh: =>
-    #clears canvas and redraws data
-    Renderer.clear(@feedback_ctx, @width, @height)
-    Renderer.applyStrokes(@feedback_ctx, @sketchData)
+  # refresh: =>
+  #   #clears canvas and redraws data
+  #   Renderer.clear(@feedback_ctx, @width, @height)
+  #   Renderer.applyStrokes(@feedback_ctx, @sketchData)
 
-  reset: =>
-    #resets data only
-    @sketchData = []
-    @strokeData = []
+  # reset: =>
+  #   #resets data only
+  #   @sketchData = []
+  #   @strokeData = []
 
   
+root.SketchListener = SketchListener
 
-root.SketchyPad = SketchyPad
 
 
-#create jQuery plugin
+############################################################################
+# generic jQuery plugin wrapper
+# creates the SketchController, which handles everything else
+# TODO, need to clean this up
+#
 (($, window, document) ->
   # Prepare your internal $this reference.
   $this = undefined
@@ -423,18 +397,20 @@ root.SketchyPad = SketchyPad
   # You *may* rely on internal, private objects:
   _flag = false
   _anotherState = null
-  _listening_layer = null
+  _sketch_controller = null
 
   # This is your public API (no leading underscore, see?)
   # All public methods must return $this so your plugin is chainable.
   methods =
     init: (options) ->
       $this = $(@)
-
-      opts = {width:$this.width(), height:$this.height()}
-      _listening_layer = new SketchyPad(opts);
-      $this.prepend(_listening_layer.$canvas);
-      _listening_layer.captureStart();
+      
+      _sketch_controller = new SketchController($this)
+      console.log(_sketch_controller)
+      # opts = {width:$this.width(), height:$this.height()}
+      # _listening_layer = new SketchyPad(opts);
+      # $this.prepend(_listening_layer.$canvas);
+      # _listening_layer.captureStart();
 
       # The settings object is available under its name: _settings. Let's
       # expand it with any custom options the user provided.
@@ -460,9 +436,6 @@ root.SketchyPad = SketchyPad
 
     # This method is often overlooked.
     destroy: ->
-      console.log('calling destroy')
-      _listening_layer.captureStop();
-      _listening_layer.$canvas.remove();
       # Do anything to clean it up (nullify references, unbind events…).
       return $this
 
@@ -492,7 +465,6 @@ root.SketchyPad = SketchyPad
   # we went the extra miles of providing a pair of public and private APIs.
   # This is also the place where you specify the name of your plugin in your code.
   $.fn.sketchyPad = (method) ->
-    console.log(method)
     if methods[method]
       methods[method].apply this, Array::slice.call(arguments, 1)
     else if typeof method is "object" or not method

@@ -1,5 +1,7 @@
 root = exports ? this
 
+
+
 #############################################################################
 #Model for storing this sketch
 #SketchData is an array of SketchStrokes
@@ -14,11 +16,68 @@ class SketchData
 #a pen stroke is an array of points, pressures, timestamps and a color value
 class SketchStroke
   constructor: () ->
-    @color = 'rgba(255,0,0,0.5)'
-    @data_points = []
+    @color = 'rgba(255,0,0,0.2)'
+    @points = []
+    @pressures = []
+    @timestamps = []
 
   add: (x,y,pressure) ->
-    @data_points.push [x,y,pressure,new Date().getTime()]
+    @points.push [x,y]
+    @pressures.push pressure
+    @timestamps.push new Date().getTime()
+
+
+smoothConfig = 
+  method: 'cubic'
+  #method: 'lanczos'
+  clip: 'clamp'
+  lanczosFilterSize:  0
+  cubicTension: 0
+
+#Euclidean distance
+distance = (a,b) -> Math.sqrt Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2)
+slope = (p1, p2) -> (p2[1] - p1[1])/(p2[0] - p1[0])
+
+
+#Add a curve segment to `context` according to current settings
+# points: the entire array of points
+addCurveSegment = (context, i, points, s) ->
+
+  #average step distance
+  averageLineLength = 1 
+
+  #Incrementing the index by a constant amount does not result in a constant distance advancement
+  #To ameliorate this, we divide the segment into a few pieces and compute a different increment for
+  #each piece to approximate the advancement distance we want.
+
+  pieceCount = 2 #should be a power of two so the for loop comes out exact
+  for t in [0...1] by 1/pieceCount
+    [start, end] = [s(i + t), s(i + t + 1/pieceCount)]
+    pieceLength = distance start, end
+    #compute du so that we get the desired average line length
+    du = averageLineLength/pieceLength
+    for u in [0...1/pieceCount] by du
+      context.lineTo s(i + t + u)...
+  #ensure that the path actually passes through the end points
+  context.lineTo s(i+1)...
+
+#given a set of points alter the x and y slightly depending on the pressure
+distortPoints = (points, pressures, direction=1) ->
+  new_points = []
+  for i in [1..pressures.length-2]
+    #y = mx + b, this is m
+    distortion = Math.pow(pressures[i],2) * 5
+    perp_angle = Math.atan2(points[i-1][1] - points[i][1], points[i-1][0] - points[i][0]) + 1.57079633
+    x_distort = distortion * Math.cos(perp_angle)
+    y_distort = distortion * Math.sin(perp_angle)
+    new_points.push [points[i][0]+direction*x_distort, points[i][1]+direction*y_distort]
+  #first and last points are the same
+  new_points.push points[points.length - 1]
+  new_points.unshift points[0]
+  return new_points
+
+
+
 
 #############################################################################
 #View class responsible for rendering lines
@@ -32,7 +91,69 @@ class SketchView
     @ctx = @$canvas[0].getContext('2d')
     @ctx.globalCompositeOperation = "source-over"
   drawStroke: (stroke) -> 
-    console.log('draw stroke', stroke)
+    color = stroke.color
+    points = stroke.points
+    pressures = stroke.pressures
+    if points.length > 2 #Draw curve if there are at least two points
+      #Clear path and move to the start point
+      @ctx.strokeStyle = "rgba(255,0,0,0.7)"
+      @ctx.fillStyle = "rgba(255,0,0,0.7)"
+      @ctx.lineWidth = 1
+      @ctx.lineJoin = 'round'
+      @ctx.lineCap = 'round'
+      @ctx.beginPath()
+      @ctx.moveTo points[0]...
+
+      #Last index to draw is the last index of the array...
+      lastIndex = points.length - 1
+
+      #Create the smooth function
+      new_points_one = distortPoints(points, pressures, 1)
+      s = Smooth new_points_one, smoothConfig
+
+      #Add all of the curve segments
+      for i in [0...lastIndex]
+        addCurveSegment @ctx, i, new_points_one, s 
+
+
+      # @ctx.stroke()
+
+      new_points_two = distortPoints(points, pressures, -1).reverse()
+      s = Smooth new_points_two, smoothConfig
+      #for i in [0...lastIndex]
+      for i in [0...lastIndex]
+        addCurveSegment @ctx, i, new_points_two, s
+
+      @ctx.lineTo points[0]... 
+      grd = @ctx.createLinearGradient(0, 0, @width, @height);
+      grd.addColorStop(0, 'rgba(255,0,0,0.1)');   
+      grd.addColorStop(1, '#004CB3');
+      @ctx.fillStyle = grd
+      # @ctx.stroke()
+      @ctx.fill()
+      # @ctx.beginPath()
+      # @ctx.moveTo points[0]...
+      # @ctx.strokeStyle = "rgba(255,0,0,0.2)"
+      # @ctx.lineWidth = 1
+      # addPressureCurveSegment @ctx, i, points, s, pressures for i in [0...lastIndex]
+      # #Set drawing style
+      # @ctx.lineWidth = 1
+      # @ctx.strokeStyle = color
+      # @ctx.lineJoin = 'round'
+      # @ctx.lineCap = 'round'
+
+      # #Draw the path
+      # @ctx.stroke()
+      #enhance
+      # if points.length > 20
+      #   @ctx.beginPath()
+      #   @ctx.moveTo points[0]...
+      #   #Add all of the curve segments
+      #   addCurveSegment @ctx, i, points.slice(0,10), s for i in [0...10]
+      #   @ctx.strokeStyle = 'rgba(255,0,0,0.1)'
+      #   @ctx.lineWidth = 2
+      #   @ctx.stroke()
+
   drawStrokes: (strokes) ->
     for stroke in strokes
       @drawStroke(stroke)
@@ -40,6 +161,8 @@ class SketchView
     console.log('playback strokes')
   clear: ()->
     @ctx.clearRect(0, 0, @width, @height)
+
+
 
 
 ##################################################################################### 
@@ -56,7 +179,6 @@ class SketchListener
     $('body').append(@$wacom_object)
 
     @$element = element;
-    console.log('sketch listening getting element', @$element)
     
     #these are events that external parties can 'listen to'
     #use addCallback, using one of these eventNames, and a function to call
@@ -111,7 +233,7 @@ class SketchListener
     $(document).bind( @mouseUpEvent, @onCanvasMouseUp )
 
   getMouseCoord: (event) =>
-    console.log('getting mouse coor')
+    
     #find the mouse coord relative to the canvas, regardless of scrolling
     if (@touchSupported)
       target = event.originalEvent.touches[0]
@@ -121,7 +243,6 @@ class SketchListener
     offset = @$element.offset();
     @mouseCoord[0] = Math.round(target.pageX - offset.left)
     @mouseCoord[1] = Math.round(target.pageY - offset.top)
-
   onCanvasMouseMove: (event) =>
     @getMouseCoord( event )
     for callback in @callbacks['onCanvasMouseMove']
@@ -139,7 +260,9 @@ class SketchListener
     @$element.bind(@mouseMoveEvent, @onCanvasMouseHover) unless @touchSupported
 
   getPressure: =>
-    return document.getElementById('wtPlugin').penAPI.pressure
+    pressure = document.getElementById('wtPlugin').penAPI.pressure
+    pressure = 0.5 if (pressure == 0)
+    return pressure
 
 
 
@@ -185,16 +308,16 @@ class SketchListener
 #         lastIndex++ if smoothConfig.clip is 'periodic'
 
 #         #Add all of the curve segments
-#         addCurveSegment cx, i, points for i in [0...lastIndex]
+#         addCurveSegment @ctx, i, points for i in [0...lastIndex]
 
 #         #Set drawing style
-#         cx.lineWidth = 2
-#         cx.strokeStyle = '#0000ff'
-#         cx.lineJoin = 'round'
-#         cx.lineCap = 'round'
+#         @ctx.lineWidth = 2
+#         @ctx.strokeStyle = '#0000ff'
+#         @ctx.lineJoin = 'round'
+#         @ctx.lineCap = 'round'
 
 #         #Draw the path
-#         cx.stroke()
+#         @ctx.stroke()
 
 
 
@@ -307,15 +430,15 @@ class SketchController
     @height = @$element.height()
 
     #create a fg and bg canvas
-    @$fg_view = new SketchView({id:'sketch_pad_fg',width:@width,height:@height})
-    @$bg_view = new SketchView({id:'sketch_page_bg',width:@width,height:@height})
+    @fg_view = new SketchView({id:'sketch_pad_fg',width:@width,height:@height})
+    @bg_view = new SketchView({id:'sketch_page_bg',width:@width,height:@height})
     
     #insert into the DOM at the element
-    @$element.prepend(@$fg_view.$canvas)
-    @$element.prepend(@$bg_view.$canvas)
+    @$element.prepend(@fg_view.$canvas)
+    @$element.prepend(@bg_view.$canvas)
     
     #add listening on the fg canvas
-    @listener = new SketchListener(@$fg_view.$canvas)
+    @listener = new SketchListener(@fg_view.$canvas)
 
     #register some methods to respond to the events
     @listener.addCallback('onCanvasMouseUp', @process_mouse_up)
@@ -338,8 +461,7 @@ class SketchController
      
      
   process_mouse_down: =>
-    console.log('mouse down')
-    @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[0], @listener.getPressure())
+    @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[1], @listener.getPressure())
     #Renderer.clear(@feedback_ctx, @width, @height)
     #Renderer.applyStrokes(@feedback_ctx, @sketchData)
     #Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
@@ -347,18 +469,17 @@ class SketchController
 
 
   process_mouse_move: =>
-    @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[0], @listener.getPressure())
-
+    @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[1], @listener.getPressure())
+    @fg_view.clear()
+    @fg_view.drawStroke(@strokeData)
     # @strokeData.push([@sketch_listener.mouseCoord.x, @sketch_listener.mouseCoord.y, @getPressure(), @elapsed_time])
     # Renderer.clear(@feedback_ctx, @width, @height)
     # Renderer.applyStrokes(@feedback_ctx, @sketchData)
     # Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
-    console.log('sketchstroke', @strokeData)
 
   process_mouse_up:  =>
     @sketchData.addStroke(@strokeData)
     @strokeData = new SketchStroke()
-    console.log('sketch Data', @sketchData)
     # Renderer.applyStrokes(@feedback_ctx, @sketchData)
     # @undo_redo.create_undo_state(['b#ff0000',3,raw_stroke_data])
 
@@ -406,7 +527,6 @@ root.SketchListener = SketchListener
       $this = $(@)
       
       _sketch_controller = new SketchController($this)
-      console.log(_sketch_controller)
       # opts = {width:$this.width(), height:$this.height()}
       # _listening_layer = new SketchyPad(opts);
       # $this.prepend(_listening_layer.$canvas);

@@ -77,6 +77,7 @@ distortPoints = (points, pressures, direction=1) ->
 class SketchView
   constructor: (opts) ->
     @$canvas = $('<canvas>',opts).attr('width',opts['width']).attr('height',opts['height'])
+    @$canvas.css('position','absolute').css('cursor','crosshair')
     @width = @$canvas.width()
     @height = @$canvas.height()
     @ctx = @$canvas[0].getContext('2d')
@@ -121,12 +122,9 @@ class SketchView
      
 
   drawStrokes: (strokes) ->
-    console.log('receiving strokes to draw', strokes)
     for stroke in strokes
-      console.log('draw stroke', stroke)
       @drawStroke(stroke)
   playbackStrokes: (strokes) ->
-    console.log('playback strokes')
   clear: ()->
     @ctx.clearRect(0, 0, @width, @height)
 
@@ -144,7 +142,13 @@ class SketchListener
     #add wacom plugin so we can get pen pressure
     @$wacom_object = $('<object>',{id:'wtPlugin',type:'application/x-wacomtabletplugin'})
     @$wacom_object.append($('<param>',{name:'onload',value:'pluginLoaded'}))
-    $('body').append(@$wacom_object)
+    $('body').append(@$wacom_object).
+      css('-webkit-touch-callout','none').
+      css('-webkit-user-select','none').
+      css('-khtml-user-select','none').
+      css('-moz-user-select','none').
+      css('-ms-user-select','none').
+      css('user-select','none')
 
     @$element = element;
     
@@ -394,6 +398,7 @@ class SketchController
   constructor: (element) ->
     #this is the element we want to create a drawable area out of
     @$element = element
+    @$element.css('position','relative')
     @width = @$element.width()
     @height = @$element.height()
 
@@ -451,7 +456,6 @@ class SketchController
     @strokeData = new SketchStroke()
     @bg_view.clear()
     @bg_view.drawStrokes(@sketchData)
-    console.log(@sketchData)
     # Renderer.applyStrokes(@feedback_ctx, @sketchData)
     # @undo_redo.create_undo_state(['b#ff0000',3,raw_stroke_data])
 

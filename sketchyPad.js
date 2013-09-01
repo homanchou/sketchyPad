@@ -75,6 +75,7 @@
   SketchView = (function() {
     function SketchView(opts) {
       this.$canvas = $('<canvas>', opts).attr('width', opts['width']).attr('height', opts['height']);
+      this.$canvas.css('position', 'absolute').css('cursor', 'crosshair');
       this.width = this.$canvas.width();
       this.height = this.$canvas.height();
       this.ctx = this.$canvas[0].getContext('2d');
@@ -116,19 +117,15 @@
 
     SketchView.prototype.drawStrokes = function(strokes) {
       var stroke, _i, _len, _results;
-      console.log('receiving strokes to draw', strokes);
       _results = [];
       for (_i = 0, _len = strokes.length; _i < _len; _i++) {
         stroke = strokes[_i];
-        console.log('draw stroke', stroke);
         _results.push(this.drawStroke(stroke));
       }
       return _results;
     };
 
-    SketchView.prototype.playbackStrokes = function(strokes) {
-      return console.log('playback strokes');
-    };
+    SketchView.prototype.playbackStrokes = function(strokes) {};
 
     SketchView.prototype.clear = function() {
       return this.ctx.clearRect(0, 0, this.width, this.height);
@@ -159,7 +156,7 @@
         name: 'onload',
         value: 'pluginLoaded'
       }));
-      $('body').append(this.$wacom_object);
+      $('body').append(this.$wacom_object).css('-webkit-touch-callout', 'none').css('-webkit-user-select', 'none').css('-khtml-user-select', 'none').css('-moz-user-select', 'none').css('-ms-user-select', 'none').css('user-select', 'none');
       this.$element = element;
       this.callbacks = {
         onCanvasMouseHover: [],
@@ -296,6 +293,7 @@
       this.process_mouse_move = __bind(this.process_mouse_move, this);
       this.process_mouse_down = __bind(this.process_mouse_down, this);
       this.$element = element;
+      this.$element.css('position', 'relative');
       this.width = this.$element.width();
       this.height = this.$element.height();
       this.fg_view = new SketchView({
@@ -334,8 +332,7 @@
       this.sketchData.push(this.strokeData);
       this.strokeData = new SketchStroke();
       this.bg_view.clear();
-      this.bg_view.drawStrokes(this.sketchData);
-      return console.log(this.sketchData);
+      return this.bg_view.drawStrokes(this.sketchData);
     };
 
     return SketchController;

@@ -3,15 +3,6 @@ root = exports ? this
 
 
 #############################################################################
-#Model for storing this sketch
-#SketchData is an array of SketchStrokes
-class SketchData
-  constructor: ()->
-    @strokes = []
-  addStroke: (stroke)->
-    @strokes.push stroke
-
-#############################################################################
 #Model for storing a single pen stroke
 #a pen stroke is an array of points, pressures, timestamps and a color value
 class SketchStroke
@@ -115,9 +106,6 @@ class SketchView
       for i in [0...lastIndex]
         addCurveSegment @ctx, i, new_points_one, s 
 
-
-      # @ctx.stroke()
-
       new_points_two = distortPoints(points, pressures, -1).reverse()
       s = Smooth new_points_two, smoothConfig
       #for i in [0...lastIndex]
@@ -129,33 +117,13 @@ class SketchView
       grd.addColorStop(0, 'rgba(255,0,0,0.1)');   
       grd.addColorStop(1, '#004CB3');
       @ctx.fillStyle = grd
-      # @ctx.stroke()
       @ctx.fill()
-      # @ctx.beginPath()
-      # @ctx.moveTo points[0]...
-      # @ctx.strokeStyle = "rgba(255,0,0,0.2)"
-      # @ctx.lineWidth = 1
-      # addPressureCurveSegment @ctx, i, points, s, pressures for i in [0...lastIndex]
-      # #Set drawing style
-      # @ctx.lineWidth = 1
-      # @ctx.strokeStyle = color
-      # @ctx.lineJoin = 'round'
-      # @ctx.lineCap = 'round'
-
-      # #Draw the path
-      # @ctx.stroke()
-      #enhance
-      # if points.length > 20
-      #   @ctx.beginPath()
-      #   @ctx.moveTo points[0]...
-      #   #Add all of the curve segments
-      #   addCurveSegment @ctx, i, points.slice(0,10), s for i in [0...10]
-      #   @ctx.strokeStyle = 'rgba(255,0,0,0.1)'
-      #   @ctx.lineWidth = 2
-      #   @ctx.stroke()
+     
 
   drawStrokes: (strokes) ->
+    console.log('receiving strokes to draw', strokes)
     for stroke in strokes
+      console.log('draw stroke', stroke)
       @drawStroke(stroke)
   playbackStrokes: (strokes) ->
     console.log('playback strokes')
@@ -449,7 +417,7 @@ class SketchController
 
     #create some data structure
     #data for the whole drawing
-    @sketchData = new SketchData()
+    @sketchData = []
     #data for just this line
     @strokeData = new SketchStroke()
 
@@ -478,8 +446,12 @@ class SketchController
     # Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
 
   process_mouse_up:  =>
-    @sketchData.addStroke(@strokeData)
+    @fg_view.clear()
+    @sketchData.push @strokeData
     @strokeData = new SketchStroke()
+    @bg_view.clear()
+    @bg_view.drawStrokes(@sketchData)
+    console.log(@sketchData)
     # Renderer.applyStrokes(@feedback_ctx, @sketchData)
     # @undo_redo.create_undo_state(['b#ff0000',3,raw_stroke_data])
 

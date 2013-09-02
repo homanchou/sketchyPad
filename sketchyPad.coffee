@@ -29,7 +29,7 @@ smoothConfig =
 distance = (a,b) -> Math.sqrt Math.pow(a[0] - b[0], 2) + Math.pow(a[1] - b[1], 2)
 slope = (p1, p2) -> (p2[1] - p1[1])/(p2[0] - p1[0])
 
-
+#this is taken directly from the smooth.js example
 #Add a curve segment to `context` according to current settings
 # points: the entire array of points
 addCurveSegment = (context, i, points, s) ->
@@ -238,155 +238,6 @@ class SketchListener
 
 
 
-
-
-
-
-# #this class is responsible for actually drawing lines
-# TODO - refactor this
-# class Renderer
-  
-#   this.clear = (ctx, width, height) ->
-#     ctx.clearRect( 0 , 0 , width, height)
-#   this.drawDot = (ctx, point) ->
-#     x = point[0]
-#     y = point[1]
-#     pressure = point[2]
-#     ctx.globalCompositeOperation = "source-over"
-#     ctx.beginPath()
-#     ctx.arc(x, y, 1, 0, Math.PI * 2, true);
-#     ctx.fillStyle='rgba(255,0,0,0.5)'
-#     ctx.fill()
-#   this.drawStroke = (ctx, stroke) ->
-#     #size and color don't change
-#     color = stroke[0]
-#     size = stroke[1]
-#     points = stroke[2]
-#     if color == null
-#       ctx.globalCompositeOperation = "destination-out" 
-#       color = 'rgba(255,255,255,1)'
-#     else
-#       ctx.globalCompositeOperation = "source-over"
-
-#     if points.length >= 2 #Draw curve if there are at least two points
-#         #Clear path and move to the start point
-#         ctx.beginPath()
-#         ctx.moveTo points[0]...
-
-#         #Last index to draw is the last index of the array...
-#         lastIndex = points.length - 1
-
-#         #...unless the clip is periodic, in which case we connect back to the start
-#         lastIndex++ if smoothConfig.clip is 'periodic'
-
-#         #Add all of the curve segments
-#         addCurveSegment @ctx, i, points for i in [0...lastIndex]
-
-#         #Set drawing style
-#         @ctx.lineWidth = 2
-#         @ctx.strokeStyle = '#0000ff'
-#         @ctx.lineJoin = 'round'
-#         @ctx.lineCap = 'round'
-
-#         #Draw the path
-#         @ctx.stroke()
-
-
-
-    #initial point
-    # x = points[0][0]
-    # y = points[0][1]
-    # for point in points
-    #   this.drawDot(ctx,point)
-    #   for i in [0...point[2]*20]
-    #     delta = Math.random()
-    #     delta -= Math.random()
-    #     this.drawDot(ctx,[point[0]+delta,point[1]+delta,point[2]])
-    
-    # if points.length == 1     
-    #   ctx.beginPath()
-    #   ctx.arc(x, y, size/2, 0, Math.PI * 2, true);
-    #   ctx.fillStyle=color
-    #   ctx.fill()
-    # else if points.length < 6
-    #   ctx.lineWidth = size
-    #   ctx.strokeStyle = color
-    #   ctx.beginPath()
-    #   ctx.moveTo(x,y)
-    #   for point in points[1..]
-    #     x = point[0]
-    #     y = point[1]
-    #     ctx.lineTo(x,y)
-    #   ctx.stroke()
-    # else
-    #   ctx.lineWidth = size
-    #   ctx.strokeStyle = color
-    #   ctx.beginPath()
-    #   ctx.moveTo(x,y)
-    #   index = 1
-    #   for point in points[1..points.length-2]
-    #     x = point[0]
-    #     y = point[1]
-    #     xc = (x + points[index+1][0]) / 2
-    #     yc = (y + points[index+1][1]) / 2
-    #     ctx.quadraticCurveTo(x,y, xc, yc)
-    #     index++
-
-    #   #curve through last two points
-    #   ctx.quadraticCurveTo(points[index-1][0],points[index-1][1], points[index][0], points[index][1])
-    #   ctx.stroke()
-  #   return
-  # this.applyStrokes = (ctx, strokes) ->
-  #   for stroke in strokes
-  #     this.drawStroke(ctx, stroke)
-  #   return
-  # this.playStrokes = (onion_skin, $transport, strokes, stroke_index=0, point_index=0, timer=null, callback) ->
-  #   ctx = onion_skin.feedback_ctx
-  #   width = onion_skin.width
-  #   height = onion_skin.height
-
-  #   window.clearInterval(timer) if timer
-  #   # #splice into the stroke and draw the beginning strokes and points
-  #   #deep clone an object so we don't screw up the source
-  #   draw_to = JSON.parse(JSON.stringify(strokes))
-  #   draw_to = draw_to[0..stroke_index]
-  #   # the last stroke's last point should be truncated to current point index
-  #   draw_to[draw_to.length-1][2] = draw_to[draw_to.length - 1][2][0..point_index]
-  #   # #draw the sucker
-  #   this.clear(ctx, width, height)
-  #   this.applyStrokes(ctx, draw_to)
-
-  #   # #is there more to draw?
-  #   if point_index < strokes[stroke_index][2].length - 1
-  #     next_point_index = point_index + 1
-  #     next_stroke_index = stroke_index
-  #     delay = strokes[next_stroke_index][2][next_point_index][2] - strokes[stroke_index][2][point_index][2]
-  #   else if stroke_index < strokes.length - 1
-  #     next_stroke_index = stroke_index + 1
-  #     next_point_index = 0
-  #     delay = 200 #time between strokes is not recorded
-  #   else
-  #     callback.call()
-  #     return
-
-  #   #return if interrupt 
-  #   if $transport.hasClass('playing')
-  #     #set a recursive with delay, pass a reference to this interval timer so it can be deleted
-  #     new_timer = window.setInterval( =>
-  #       this.playStrokes(onion_skin, $transport, strokes, next_stroke_index, next_point_index, new_timer, callback)
-  #     ,delay)
-  #     return
-  #   else
-  #     this.clear(ctx, width, height)
-  #     this.applyStrokes(ctx, strokes)
-  #     callback.call()
-  #     return
-
-
-
-
-
-
 ##################################################################################### 
 # SketchController creates the sketch canvases
 # it receives the messages that occur during drawing
@@ -435,41 +286,21 @@ class SketchController
      
   process_mouse_down: =>
     @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[1], @listener.getPressure())
-    #Renderer.clear(@feedback_ctx, @width, @height)
-    #Renderer.applyStrokes(@feedback_ctx, @sketchData)
-    #Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
-
+   
 
 
   process_mouse_move: =>
     @strokeData.add(@listener.mouseCoord[0], @listener.mouseCoord[1], @listener.getPressure())
     @fg_view.clear()
     @fg_view.drawStroke(@strokeData)
-    # @strokeData.push([@sketch_listener.mouseCoord.x, @sketch_listener.mouseCoord.y, @getPressure(), @elapsed_time])
-    # Renderer.clear(@feedback_ctx, @width, @height)
-    # Renderer.applyStrokes(@feedback_ctx, @sketchData)
-    # Renderer.drawStroke(@feedback_ctx, [@selected_tool, @tool_size, @strokeData])
-
+  
   process_mouse_up:  =>
     @fg_view.clear()
     @sketchData.push @strokeData
     @strokeData = new SketchStroke()
     @bg_view.clear()
     @bg_view.drawStrokes(@sketchData)
-    # Renderer.applyStrokes(@feedback_ctx, @sketchData)
-    # @undo_redo.create_undo_state(['b#ff0000',3,raw_stroke_data])
-
-
-  # refresh: =>
-  #   #clears canvas and redraws data
-  #   Renderer.clear(@feedback_ctx, @width, @height)
-  #   Renderer.applyStrokes(@feedback_ctx, @sketchData)
-
-  # reset: =>
-  #   #resets data only
-  #   @sketchData = []
-  #   @strokeData = []
-
+  
   
 root.SketchListener = SketchListener
 
